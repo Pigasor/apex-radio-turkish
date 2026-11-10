@@ -91,15 +91,48 @@ def _wheel_en(w: str) -> str:
     return WHEEL_EN[WHEEL.index(w)] if w in WHEEL else {"avant": "front", "arrière": "rear"}.get(w, w)
 
 
+# ------------------------------------------------------------ turc
+TIPS_TR = {
+    ("sous-virage", "entrée"): "fren dengesini biraz arkaya al ya da ön viraj demirini yumuşat",
+    ("sous-virage", "milieu"): "ön viraj demirini yumuşat ya da ön kanadı bir kademe artır",
+    ("sous-virage", "sortie"): "diferansiyelin güç kilidini azalt ya da önü yumuşat",
+    ("survirage", "entrée"): "fren dengesini biraz öne al ya da motor frenini azalt",
+    ("survirage", "milieu"): "arka viraj demirini yumuşat ya da arka kanadı bir kademe artır",
+    ("survirage", "sortie"): "çekiş kontrolünü bir kademe artır ya da arka viraj demirini yumuşat",
+    ("blocage", "avant"): "fren dengesini yarım puan arkaya al",
+    ("blocage", "arrière"): "fren dengesini yarım puan öne al",
+    ("patinage", ""): "çekiş kontrolünü bir kademe artır ya da gazda daha yumuşak ol",
+    ("surbraquage", ""): "direksiyonu fazla kırıyorsun, ön bırakıyor ve hız kaybediyorsun: daha az açıyla ön daha iyi tutunur",
+}
+GARAGE_TIPS_TR = {
+    ("sous-virage", "milieu"): "daha yumuşak ön viraj demiri",
+    ("sous-virage", "sortie"): "daha az diferansiyel güç kilidi ya da daha yumuşak ön viraj demiri",
+    ("sous-virage", "entrée"): "daha yumuşak ön viraj demiri",
+    ("survirage", "milieu"): "daha yumuşak arka viraj demiri ya da arka kanatta bir kademe",
+    ("survirage", "sortie"): "daha yumuşak arka viraj demiri",
+    ("survirage", "entrée"): "daha fazla diferansiyel boşta kilidi",
+}
+KIND_TR = {"sous-virage": "önden kayma", "survirage": "arkadan kayma", "blocage": "kilitlenme", "patinage": "patinaj",
+           "surbraquage": "aşırı direksiyon"}
+PHASE_TR = {"entrée": "girişinde", "milieu": "ortasında", "sortie": "çıkışında"}
+WHEEL_TR = ["ön sol", "ön sağ", "arka sol", "arka sağ"]
+CTRL_NAME_TR = {"bias": "Fren dengesi", "tc": "Çekiş kontrolü", "abs": "ABS",
+                "farb": "Ön viraj demiri", "rarb": "Arka viraj demiri"}
+
+
+def _wheel_tr(w: str) -> str:
+    return WHEEL_TR[WHEEL.index(w)] if w in WHEEL else {"avant": "ön", "arrière": "arka"}.get(w, w)
+
+
 def _tip(k: str, w: str) -> str:
-    return L(TIPS[(k, w)], TIPS_EN[(k, w)])
+    return L(TIPS[(k, w)], TIPS_EN[(k, w)], TIPS_TR.get((k, w)))
 
 
 def _garage(k: str, w) -> str:
     fr = GARAGE_TIPS.get((k, w)) or GARAGE_TIPS.get((k, None)) or ""
     if not fr:
         return ""
-    return L(fr, GARAGE_TIPS_EN.get((k, w)) or fr)
+    return L(fr, GARAGE_TIPS_EN.get((k, w)) or fr, GARAGE_TIPS_TR.get((k, w)))
 
 
 def _in_car(k: str, w: str) -> bool:
@@ -282,10 +315,10 @@ class Behavior:
                 self._reset_linked(k)
                 if self.say:
                     if k == "bias":
-                        val = dec(L(f"à {(1 - v) * 100:.1f} % à l'avant", f"{(1 - v) * 100:.1f} % front"))
+                        val = dec(L(f"à {(1 - v) * 100:.1f} % à l'avant", f"{(1 - v) * 100:.1f} % front", f"ön %{(1 - v) * 100:.1f}"))
                     else:
-                        val = L(f"sur {v}", f"{v}")
-                    self.say(None, L(f"{CTRL_NAME[k]} passée {val}, je réévalue.", f"{CTRL_NAME_EN[k]} now {val}, re-evaluating."))
+                        val = L(f"sur {v}", f"{v}", f"{v}")
+                    self.say(None, L(f"{CTRL_NAME[k]} passée {val}, je réévalue.", f"{CTRL_NAME_EN[k]} now {val}, re-evaluating.", f"{CTRL_NAME_TR[k]} artık {val}, yeniden değerlendiriyorum."))
 
     def _reset_linked(self, k: str) -> None:
         links = LINKED.get(k, set())
@@ -366,9 +399,9 @@ class Behavior:
                 d = d[:1].upper() + d[1:]
                 garage = _garage(k, w)
                 if garage:
-                    self.garage_notes[(k, w)] = f"{self.describe_group(k, w, corners)}{L(' : ', ': ')}{garage}"
+                    self.garage_notes[(k, w)] = f"{self.describe_group(k, w, corners)}{L(' : ', ': ', ': ')}{garage}"
                 if _in_car(k, w):
-                    self.say(None, L(f"{d}. Conseil : {self.tip((k, corners[0], w))}.", f"{d}. Tip: {self.tip((k, corners[0], w))}."))
+                    self.say(None, L(f"{d}. Conseil : {self.tip((k, corners[0], w))}.", f"{d}. Tip: {self.tip((k, corners[0], w))}.", f"{d}. Öneri: {self.tip((k, corners[0], w))}."))
                 else:
                     if self.repeats[(k, corners[0], w)] > 1:
                         continue   # problème de garage : dit une seule fois en piste
@@ -376,7 +409,8 @@ class Behavior:
                         continue   # une seule annonce « garage » par session : le reste est noté pour la fin
                     self.garage_said = time.monotonic()
                     self.say(None, L(f"{d}. Ça se corrige au garage, je te le rappelle après la course.",
-                                     f"{d}. That's a garage fix, I'll remind you after the race."))
+                                     f"{d}. That's a garage fix, I'll remind you after the race.",
+                                     f"{d}. Bu garajda çözülür, yarıştan sonra hatırlatırım."))
                 break
 
     @staticmethod
@@ -385,16 +419,16 @@ class Behavior:
             return Behavior.describe((k, 0, w))
         if len(corners) == 1:
             return Behavior.describe((k, corners[0], w))
-        lst = ", ".join(str(c) for c in corners[:-1]) + L(f" et {corners[-1]}", f" and {corners[-1]}")
+        lst = ", ".join(str(c) for c in corners[:-1]) + L(f" et {corners[-1]}", f" and {corners[-1]}", f" ve {corners[-1]}")
         if k == "blocage":
-            return L(f"blocage {w} au freinage des virages {lst}", f"{_wheel_en(w)} lock-up braking into turns {lst}")
+            return L(f"blocage {w} au freinage des virages {lst}", f"{_wheel_en(w)} lock-up braking into turns {lst}", f"{lst}. virajların frenajında {_wheel_tr(w)} kilitlenme")
         if k == "patinage":
-            return L(f"patinage en sortie des virages {lst}", f"wheelspin on exit of turns {lst}")
+            return L(f"patinage en sortie des virages {lst}", f"wheelspin on exit of turns {lst}", f"{lst}. virajların çıkışında patinaj")
         if k == "surbraquage":
-            return L(f"trop d'angle de volant aux virages {lst}, l'avant glisse", f"too much steering at turns {lst}, the front is sliding")
+            return L(f"trop d'angle de volant aux virages {lst}, l'avant glisse", f"too much steering at turns {lst}, the front is sliding", f"{lst}. virajlarda fazla direksiyon açısı, ön kayıyor")
         if w == "milieu":
-            return L(f"{k} au milieu des virages {lst}", f"mid-corner {KIND_EN[k]} at turns {lst}")
-        return L(f"{k} en {w} des virages {lst}", f"{KIND_EN[k]} on {PHASE_EN.get(w, w)} at turns {lst}")
+            return L(f"{k} au milieu des virages {lst}", f"mid-corner {KIND_EN[k]} at turns {lst}", f"{lst}. virajların ortasında {KIND_TR[k]}")
+        return L(f"{k} en {w} des virages {lst}", f"{KIND_EN[k]} on {PHASE_EN.get(w, w)} at turns {lst}", f"{lst}. virajların {PHASE_TR.get(w, w)} {KIND_TR[k]}")
 
     def _tyres(self) -> None:
         if self.temps_n < 20:
@@ -416,35 +450,35 @@ class Behavior:
         self.tyre_findings = findings
         # texte : on regroupe avant / arrière quand les deux côtés disent la même chose
         TXT = {
-            "camber_less": (L("plus chaud{s} à l'intérieur{d} : un peu moins de carrossage", "hotter on the inside{d}: a bit less camber")),
-            "camber_more": (L("plus chaud{s} à l'extérieur : un peu plus de carrossage", "hotter on the outside: a bit more camber")),
-            "pressure_down": (L("chaud{s} au centre : pression un peu trop haute", "hot in the middle: pressure a bit too high")),
-            "pressure_up": (L("froid{s} au centre : pression un peu trop basse", "cold in the middle: pressure a bit too low")),
+            "camber_less": (L("plus chaud{s} à l'intérieur{d} : un peu moins de carrossage", "hotter on the inside{d}: a bit less camber", "içi daha sıcak{d}: kamberi biraz azalt")),
+            "camber_more": (L("plus chaud{s} à l'extérieur : un peu plus de carrossage", "hotter on the outside: a bit more camber", "dışı daha sıcak: kamberi biraz artır")),
+            "pressure_down": (L("chaud{s} au centre : pression un peu trop haute", "hot in the middle: pressure a bit too high", "ortası sıcak: basınç biraz yüksek")),
+            "pressure_up": (L("froid{s} au centre : pression un peu trop basse", "cold in the middle: pressure a bit too low", "ortası soğuk: basınç biraz düşük")),
         }
-        names = L("avant gauche|avant droit|arrière gauche|arrière droit", "front left|front right|rear left|rear right").split("|")
+        names = L("avant gauche|avant droit|arrière gauche|arrière droit", "front left|front right|rear left|rear right", "ön sol|ön sağ|arka sol|arka sağ").split("|")
         merged, single = [], []
         done = set()
         for kind in TXT:
-            for axle, (a, b) in ((L("avant", "front"), (0, 1)), (L("arrière", "rear"), (2, 3))):
+            for axle, (a, b) in ((L("avant", "front", "ön"), (0, 1)), (L("arrière", "rear", "arka"), (2, 3))):
                 if (kind, a) in findings and (kind, b) in findings:
                     dd = max(deltas.get((kind, a), 0), deltas.get((kind, b), 0))
                     d = f" ({dd:.0f}°)" if dd else ""
-                    merged.append(L(f"pneus {axle} ", f"{axle} tyres ") + TXT[kind].format(s="s", d=d))
+                    merged.append(L(f"pneus {axle} ", f"{axle} tyres ", f"{axle} lastiklerin ") + TXT[kind].format(s="s", d=d))
                     done |= {(kind, a), (kind, b)}
         for kind, i in findings:
             if (kind, i) in done:
                 continue
             dd = deltas.get((kind, i), 0)
             d = f" ({dd:.0f}°)" if dd else ""
-            single.append(L(f"pneu {names[i]} ", f"{names[i]} tyre ") + TXT[kind].format(s="", d=d))
+            single.append(L(f"pneu {names[i]} ", f"{names[i]} tyre ", f"{names[i]} lastiğin ") + TXT[kind].format(s="", d=d))
         self.tyre_tips = merged + single
         # pneus : seulement si le constat change, ou un rappel tous les 10 tours
         key = tuple(self.tyre_tips[:2])
         said, when = self.tyre_said
         if self.say and key and said is None and self.laps_seen - self.last_say >= 1:
             self.tyre_said = (key, self.laps_seen)
-            self.say(None, L("Côté pneus : ", "Tyres: ") + " ; ".join(self.tyre_tips[:2])
-                     + L(". C'est pour le garage, je te le rappelle après la course.", ". That's for the garage, I'll remind you after the race."))
+            self.say(None, L("Côté pneus : ", "Tyres: ", "Lastikler: ") + " ; ".join(self.tyre_tips[:2])
+                     + L(". C'est pour le garage, je te le rappelle après la course.", ". That's for the garage, I'll remind you after the race.", ". Bu garajlık bir iş, yarıştan sonra hatırlatırım."))
 
     # ----------------------------------------------------------- textes
     @staticmethod
@@ -452,16 +486,17 @@ class Behavior:
         k, c, w = it
         if c == 0:
             return L("la voiture est globalement " + ("sous-vireuse" if k == "sous-virage" else "survireuse"),
-                     "the car is " + ("understeering" if k == "sous-virage" else "oversteering") + " overall")
+                     "the car is " + ("understeering" if k == "sous-virage" else "oversteering") + " overall",
+                     "araç genel olarak " + ("önden kayıyor" if k == "sous-virage" else "arkadan kayıyor"))
         if k == "blocage":
-            return L(f"blocage {w} au freinage du virage {c}", f"{_wheel_en(w)} lock-up braking into turn {c}")
+            return L(f"blocage {w} au freinage du virage {c}", f"{_wheel_en(w)} lock-up braking into turn {c}", f"{c}. virajın frenajında {_wheel_tr(w)} kilitlenme")
         if k == "patinage":
-            return L(f"patinage en sortie du virage {c}", f"wheelspin on exit of turn {c}")
+            return L(f"patinage en sortie du virage {c}", f"wheelspin on exit of turn {c}", f"{c}. virajın çıkışında patinaj")
         if k == "surbraquage":
-            return L(f"trop d'angle de volant au virage {c}, l'avant glisse", f"too much steering at turn {c}, the front is sliding")
+            return L(f"trop d'angle de volant au virage {c}, l'avant glisse", f"too much steering at turn {c}, the front is sliding", f"{c}. virajda fazla direksiyon açısı, ön kayıyor")
         if w == "milieu":
-            return L(f"{k} au milieu du virage {c}", f"mid-corner {KIND_EN[k]} at turn {c}")
-        return L(f"{k} en {w} du virage {c}", f"{KIND_EN[k]} on {PHASE_EN.get(w, w)} of turn {c}")
+            return L(f"{k} au milieu du virage {c}", f"mid-corner {KIND_EN[k]} at turn {c}", f"{c}. virajın ortasında {KIND_TR[k]}")
+        return L(f"{k} en {w} du virage {c}", f"{KIND_EN[k]} on {PHASE_EN.get(w, w)} of turn {c}", f"{c}. virajın {PHASE_TR.get(w, w)} {KIND_TR[k]}")
 
     def tip(self, it) -> str:
         k, c, w = it
@@ -471,25 +506,30 @@ class Behavior:
             if b and self.bias_start is not None and abs(b - self.bias_start) >= 0.9:
                 # déjà 1 % de déplacé : on ne fait pas dériver la répartition, c'est le pilotage
                 return L(f"freine un peu moins fort à l'attaque du virage {c}, la répartition a déjà assez bougé",
-                         f"brake a little less hard into turn {c}, the bias has moved enough already")
+                         f"brake a little less hard into turn {c}, the bias has moved enough already",
+                         f"{c}. viraja biraz daha yumuşak frenle, fren dengesi yeterince kaydı")
             if b:
                 nb = b - 0.5 if front else b + 0.5
                 return dec(L(f"passe la répartition de freinage de {b:.1f} à {nb:.1f} % à l'avant",
-                             f"move the brake bias from {b:.1f} to {nb:.1f} % front"))
+                             f"move the brake bias from {b:.1f} to {nb:.1f} % front",
+                             f"fren dengesini ön %{b:.1f} değerinden %{nb:.1f} değerine al"))
             return _tip("blocage", "avant" if front else "arrière")
         if k in ("patinage", "surbraquage"):
             return _tip(k, "")
         if (k, w) == ("sous-virage", "entrée"):
             return dec(L(f"recule la répartition de freinage de {b:.1f} à {b - 0.5:.1f} % à l'avant",
-                         f"move the brake bias back from {b:.1f} to {b - 0.5:.1f} % front") if b else
-                       L("recule un peu la répartition de freinage", "move the brake bias back a little"))
+                         f"move the brake bias back from {b:.1f} to {b - 0.5:.1f} % front",
+                         f"fren dengesini arkaya al: ön %{b:.1f} değerinden %{b - 0.5:.1f} değerine") if b else
+                       L("recule un peu la répartition de freinage", "move the brake bias back a little", "fren dengesini biraz arkaya al"))
         if (k, w) == ("survirage", "entrée"):
             return dec(L(f"avance la répartition de freinage de {b:.1f} à {b + 0.5:.1f} % à l'avant",
-                         f"move the brake bias forward from {b:.1f} to {b + 0.5:.1f} % front") if b else
-                       L("avance un peu la répartition de freinage", "move the brake bias forward a little"))
+                         f"move the brake bias forward from {b:.1f} to {b + 0.5:.1f} % front",
+                         f"fren dengesini öne al: ön %{b:.1f} değerinden %{b + 0.5:.1f} değerine") if b else
+                       L("avance un peu la répartition de freinage", "move the brake bias forward a little", "fren dengesini biraz öne al"))
         if (k, w) == ("survirage", "sortie"):
             return L("monte le contrôle de traction d'un cran, et dose l'accélération en sortie",
-                     "one more click of traction control, and be smoother on exit")
+                     "one more click of traction control, and be smoother on exit",
+                     "çekiş kontrolünü bir kademe artır ve çıkışta daha yumuşak ol")
         if not _in_car(k, w):
             return _garage(k, w) or _tip(k, w)
         return _tip(k, w)
@@ -501,27 +541,28 @@ class Behavior:
             for i in self.issues:
                 g = _garage(i["kind"], i["where"])
                 if g and not any(i["text"] in n for n in notes):
-                    notes.append(f"{i['text']}{L(' : ', ': ')}{g}")
+                    notes.append(f"{i['text']}{L(' : ', ': ', ': ')}{g}")
             notes += self.tyre_tips[:2]
         if not notes:
             return None
-        return L("Pour le setup, voici ce que je changerais : ", "For the setup, here's what I'd change: ") + " ; ".join(notes[:4]) \
-            + L(". J'ouvre l'atelier setup avec mes propositions.", ". I'm opening the setup workshop with my suggestions.")
+        return L("Pour le setup, voici ce que je changerais : ", "For the setup, here's what I'd change: ", "Setup için değiştireceklerim: ") + " ; ".join(notes[:4]) \
+            + L(". J'ouvre l'atelier setup avec mes propositions.", ". I'm opening the setup workshop with my suggestions.", ". Önerilerimle setup atölyesini açıyorum.")
 
     def summary(self) -> str:
         with self.lock:
             if not self.map.corners():
                 return L("J'ai besoin d'un tour complet pour connaître le circuit avant d'analyser la voiture.",
-                         "I need a full lap to learn the track before analysing the car.")
+                         "I need a full lap to learn the track before analysing the car.",
+                         "Aracı analiz etmeden önce pisti öğrenmek için tam bir tura ihtiyacım var.")
             if self.laps_seen < 3:
-                return L("J'analyse encore, il me faut deux ou trois tours propres.", "Still analysing, I need two or three clean laps.")
+                return L("J'analyse encore, il me faut deux ou trois tours propres.", "Still analysing, I need two or three clean laps.", "Hâlâ analiz ediyorum, iki üç temiz tur lazım.")
             out = []
             if self.issues:
-                out.append(L(" ; ", "; ").join(f"{i['text']}{L(' : ', ': ')}{i['tip']}" for i in self.issues[:3]) + ".")
+                out.append(L(" ; ", "; ", "; ").join(f"{i['text']}{L(' : ', ': ', ': ')}{i['tip']}" for i in self.issues[:3]) + ".")
             else:
-                out.append(L("La voiture est plutôt équilibrée, rien de répétitif à signaler.", "The car is fairly balanced, nothing recurring to report."))
+                out.append(L("La voiture est plutôt équilibrée, rien de répétitif à signaler.", "The car is fairly balanced, nothing recurring to report.", "Araç oldukça dengeli, tekrarlayan bir sorun yok."))
             if self.tyre_tips:
-                out.append(L("Pneus : ", "Tyres: ") + " ; ".join(self.tyre_tips[:2]) + ".")
+                out.append(L("Pneus : ", "Tyres: ", "Lastikler: ") + " ; ".join(self.tyre_tips[:2]) + ".")
             txt = " ".join(out)
             return txt[:1].upper() + txt[1:]
 

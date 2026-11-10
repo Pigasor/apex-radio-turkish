@@ -27,6 +27,8 @@ from i18n import L
 
 PROMPT_EN = ("Race car radio. Fuel, consumption, energy, tyres, wear, pit, box, stop, "
              "gap ahead, behind, position, weather, rain, laps left, lap time.")
+PROMPT_TR = ("Yarış telsizi. Yakıt, tüketim, enerji, lastik, aşınma, pit, box, duruş, "
+             "öndeki fark, arkadaki, pozisyon, hava durumu, yağmur, kalan tur, tur zamanı, sektör, hasar, tamir.")
 PROMPT = ("Radio course automobile. Essence, conso, énergie, pneus, usure, stand, box, arrêt, "
           "écart devant, derrière, position, météo, pluie, tours restants, chrono.")
 
@@ -99,10 +101,10 @@ class Radio:
     @staticmethod
     def label(b) -> str:
         if not b:
-            return L("aucun", "none")
+            return L("aucun", "none", "yok")
         if b["type"] == "key":
-            return L(f"clavier · {key_name(b['vk'])}", f"keyboard · {key_name(b['vk'])}")
-        return L(f"{b['name']} · bouton {b['button'] + 1}", f"{b['name']} · button {b['button'] + 1}")
+            return L(f"clavier · {key_name(b['vk'])}", f"keyboard · {key_name(b['vk'])}", f"klavye · {key_name(b['vk'])}")
+        return L(f"{b['name']} · bouton {b['button'] + 1}", f"{b['name']} · button {b['button'] + 1}", f"{b['name']} · tuş {b['button'] + 1}")
 
     def info(self) -> dict:
         b = self.cfg.get("ptt")
@@ -157,11 +159,11 @@ class Radio:
             print("  Reconnaissance vocale : prête")
         except Exception as e:
             import traceback; traceback.print_exc()
-            self.detail = L(f"Reconnaissance vocale indisponible : {e!r}", f"Speech recognition unavailable: {e!r}")
+            self.detail = L(f"Reconnaissance vocale indisponible : {e!r}", f"Speech recognition unavailable: {e!r}", f"Ses tanıma kullanılamıyor: {e!r}")
             print("  " + self.detail)
 
     def transcribe(self, audio) -> str:
-        segs, _ = self._whisper.transcribe(audio, language=i18n.LANG, beam_size=1, initial_prompt=PROMPT_EN if i18n.en() else PROMPT,
+        segs, _ = self._whisper.transcribe(audio, language=i18n.LANG, beam_size=1, initial_prompt={"en": PROMPT_EN, "tr": PROMPT_TR}.get(i18n.LANG, PROMPT),
                                            condition_on_previous_text=False, vad_filter=False)
         return " ".join(s.text.strip() for s in segs).strip()
 
@@ -181,7 +183,8 @@ class Radio:
             mics = [m for m in self.mics() if m["index"] is not None]
             if not mics:
                 raise RuntimeError(L("Aucun micro trouvé. Branche ton micro ou ton casque, puis choisis-le dans la liste.",
-                                     "No microphone found. Plug in your mic or headset, then pick it in the list."))
+                                     "No microphone found. Plug in your mic or headset, then pick it in the list.",
+                                     "Mikrofon bulunamadı. Mikrofonunu veya kulaklığını tak, sonra listeden seç."))
             dev = mics[0]["index"]
             print(f"  Pas de micro par défaut dans Windows : j'utilise « {mics[0]['name']} »")
         name = sd.query_devices(dev if dev is not None else sd.default.device[0])["name"]
@@ -211,13 +214,14 @@ class Radio:
                                 "et vérifie Paramètres Windows > Confidentialité > Microphone "
                                 "(« Autoriser les applications de bureau »).",
                                 "The mic is only recording silence. Pick your mic in the list below, "
-                                "and check Windows Settings > Privacy > Microphone (\"Let desktop apps access your microphone\").")
+                                "and check Windows Settings > Privacy > Microphone (\"Let desktop apps access your microphone\").",
+                                "Mikrofon yalnızca sessizlik kaydediyor. Aşağıdaki listeden mikrofonunu seç " "ve Windows Ayarları > Gizlilik > Mikrofon bölümünü kontrol et (\"Masaüstü uygulamalarının mikrofonunuza erişmesine izin verin\").")
                 self.on_question("")
                 return
             self.detail = ""
             if self._whisper is None:
                 self.state = "prêt"
-                self.detail = L("La reconnaissance vocale se charge encore…", "Speech recognition is still loading…")
+                self.detail = L("La reconnaissance vocale se charge encore…", "Speech recognition is still loading…", "Ses tanıma hâlâ yükleniyor…")
                 return
             self.state = "réflexion"
             t = time.time()
@@ -304,7 +308,8 @@ class Radio:
         if self.learn_target in SHORTCUTS:
             if binding == self.cfg.get("ptt"):
                 self.detail = L("Ce bouton sert déjà à la radio : choisis-en un autre.",
-                                "That button is already your radio button: pick another one.")
+                                "That button is already your radio button: pick another one.",
+                                "Bu tuş zaten telsiz tuşun: başka birini seç.")
             else:
                 sc = self.cfg.setdefault("shortcuts", {})
                 for k in SHORTCUTS:                    # un bouton = une seule action
@@ -366,7 +371,8 @@ class Radio:
                             self.detail = L(f"Micro indisponible : {e!r}. Choisis ton micro dans la liste ci-dessous, et vérifie "
                                             "Paramètres Windows > Son > Entrée (micro par défaut) et Confidentialité > Microphone.",
                                             f"Microphone unavailable: {e!r}. Pick your mic in the list below, and check "
-                                            "Windows Settings > Sound > Input (default mic) and Privacy > Microphone.")
+                                            "Windows Settings > Sound > Input (default mic) and Privacy > Microphone.",
+                                            f"Mikrofon kullanılamıyor: {e!r}. Aşağıdaki listeden mikrofonunu seç ve " "Windows Ayarları > Ses > Giriş (varsayılan mikrofon) ile Gizlilik > Mikrofon bölümlerini kontrol et.")
                         print("  " + self.detail)
                 elif not now and pressed and self.state == "écoute":
                     audio = self._stop_rec()

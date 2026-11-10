@@ -53,14 +53,15 @@ PORT = 8765
 
 
 def system_lang() -> str:
-    """Premier lancement : français si Windows est en français, sinon anglais."""
+    """Premier lancement : français ou turc si Windows est dans cette langue, sinon anglais."""
     try:
         if sys.platform == "win32":
             import ctypes
             lid = ctypes.windll.kernel32.GetUserDefaultUILanguage()
-            return "fr" if (lid & 0x3FF) == 0x0C else "en"
+            return {0x0C: "fr", 0x1F: "tr"}.get(lid & 0x3FF, "en")
         import locale
-        return "fr" if (locale.getlocale()[0] or "").lower().startswith("fr") else "en"
+        loc = (locale.getlocale()[0] or "").lower()[:2]
+        return loc if loc in ("fr", "tr") else "en"
     except Exception:
         return "fr"
 
@@ -91,14 +92,14 @@ class State:
         v = self.voice
         v.enabled = not v.enabled
         if v.enabled:
-            v.say(L("Radio active.", "Radio on."), urgent=True)
+            v.say(L("Radio active.", "Radio on.", "Telsiz açık."), urgent=True)
         print(f"  Radio : {'activée' if v.enabled else 'coupée'}")
 
     def toggle_quiet(self) -> None:
         v = self.voice
         v.quiet = not v.quiet
-        v.say(L("Mode silence : je ne te dis plus que l'urgent.", "Quiet mode: urgent calls only.") if v.quiet
-              else L("Fin du silence, je te redonne toutes les infos.", "Quiet mode off, back to full info."),
+        v.say(L("Mode silence : je ne te dis plus que l'urgent.", "Quiet mode: urgent calls only.", "Sessiz mod: yalnızca acil çağrılar.") if v.quiet
+              else L("Fin du silence, je te redonne toutes les infos.", "Quiet mode off, back to full info.", "Sessiz mod kapalı, tüm bilgilere dönüyorum."),
               urgent=True)
 
     def toggle_spotter(self) -> None:
@@ -107,7 +108,7 @@ class State:
             sp.enabled = not sp.enabled
             self.radio.cfg["spotter"] = sp.enabled
             save_config(self.radio.cfg)
-            self.voice.say(L("Spotter activé.", "Spotter on.") if sp.enabled else L("Spotter coupé.", "Spotter off."),
+            self.voice.say(L("Spotter activé.", "Spotter on.", "Spotter açık.") if sp.enabled else L("Spotter coupé.", "Spotter off.", "Spotter kapalı."),
                            urgent=True)
 
     def on_shortcut(self, name: str) -> None:
@@ -208,7 +209,8 @@ def loop(state: State, demo: bool) -> None:
             f"Attention, ton setup {m['file'][:-4]} a été fait pour la {car_label(m['setup'])}, "
             f"mais tu es en {car_label(m['car'], sn.car)}. Charge plutôt un setup fait pour cette voiture.",
             f"Careful, your setup {m['file'][:-4]} was made for the {car_label(m['setup'])}, "
-            f"but you're in the {car_label(m['car'], sn.car)}. Better load a setup made for this car."), urgent=False)
+            f"but you're in the {car_label(m['car'], sn.car)}. Better load a setup made for this car.",
+            f"Dikkat, {m['file'][:-4]} adlı setup'ın {car_label(m['setup'])} için hazırlanmış, " f"ama sen {car_label(m['car'], sn.car)} kullanıyorsun. Bu araç için hazırlanmış bir setup yüklesen iyi olur."), urgent=False)
 
     threading.Thread(target=setup_sync, daemon=True).start()
     inc = Incidents(beh)
@@ -456,7 +458,7 @@ def make_handler(state: State):
                 state.radio.cfg["lang"] = i18n.LANG
                 save_config(state.radio.cfg)
                 v.flush()
-                v.say(L("Radio en français.", "Radio in English."))
+                v.say(L("Radio en français.", "Radio in English.", "Telsiz artık Türkçe."))
             elif self.path == "/api/voice/quiet":
                 state.toggle_quiet()
             elif self.path == "/api/setup/race":
@@ -491,7 +493,7 @@ def make_handler(state: State):
                 v.volume = max(0.6, min(1.6, vol))
                 state.radio.cfg["volume"] = v.volume
                 save_config(state.radio.cfg)
-                v.say(L("Radio check, niveau du son.", "Radio check, volume level."))
+                v.say(L("Radio check, niveau du son.", "Radio check, volume level.", "Telsiz kontrol, ses düzeyi."))
             elif self.path == "/api/ptt/learn":
                 n = int(self.headers.get("Content-Length") or 0)
                 target = (json.loads(self.rfile.read(n) or b"{}") if n else {}).get("target", "ptt")
@@ -541,7 +543,8 @@ def make_handler(state: State):
                     if not out.get("error"):
                         state.beh.reset_analysis()
                         state.eng.say(None, L(f"Setup remis en version {out['version'][1:]}. Recharge-le au garage.",
-                                              f"Setup restored to version {out['version'][1:]}. Reload it in the garage."), elapsed=state.snap.elapsed)
+                                              f"Setup restored to version {out['version'][1:]}. Reload it in the garage.",
+                                              f"Setup {out['version'][1:]}. sürüme döndürüldü. Garajdan yeniden yükle."), elapsed=state.snap.elapsed)
                 elif self.path.endswith("select"):
                     prev = ws.state(tr)
                     ws.select(tr, req.get("folder"), req.get("file"))
@@ -562,7 +565,8 @@ def make_handler(state: State):
                         state.beh.reset_analysis()
                         state.eng.say(None, L(f"Setup {ws.mode.lower()} mis à jour, version {out['version'][1:]}. Recharge-le au garage, je refais l'analyse.",
                                               f"{'Qualifying' if ws.mode == 'Qualif' else 'Race'} setup updated, version {out['version'][1:]}. "
-                                              "Reload it in the garage, I'll redo the analysis."),
+                                              "Reload it in the garage, I'll redo the analysis.",
+                                              f"{'Sıralama' if ws.mode == 'Qualif' else 'Yarış'} setup'ı güncellendi, {out['version'][1:]}. sürüm. " "Garajdan yeniden yükle, analizi baştan yapacağım."),
                                       elapsed=state.snap.elapsed)
                 body = json.dumps(out).encode()
                 self.send_response(200)
@@ -590,9 +594,10 @@ def make_handler(state: State):
                         v.say(voices.L_ready(name), urgent=True)
                     else:   # l'ancienne voix prévient ; la nouvelle se présentera une fois téléchargée
                         v.say(L(f"Je télécharge la voix de {name}, {'elle' if voices.engineer_female() else 'il'} prend la radio dans une minute.",
-                                f"Downloading {name}'s voice, it'll take over the radio in a minute."), urgent=True)
+                                f"Downloading {name}'s voice, it'll take over the radio in a minute.",
+                                f"{name} sesi indiriliyor, bir dakika içinde telsizi devralacak."), urgent=True)
             elif self.path == "/api/voice/test":
-                v.say(L("Radio check. Tu m'entends bien ? On est prêts pour la course.", "Radio check. Do you copy? We're ready to race."))
+                v.say(L("Radio check. Tu m'entends bien ? On est prêts pour la course.", "Radio check. Do you copy? We're ready to race.", "Telsiz kontrol. Beni duyuyor musun? Yarışa hazırız."))
             else:
                 self.send_error(404)
                 return
@@ -754,7 +759,7 @@ def set_setups_dir(state, raw: str) -> dict:
             except Exception:
                 pass
             return {"ok": True, "dir": str(c)}
-    return {"ok": False, "error": i18n.L("Ce dossier ne contient pas les setups de LMU.", "This folder doesn't contain LMU setups.")}
+    return {"ok": False, "error": i18n.L("Ce dossier ne contient pas les setups de LMU.", "This folder doesn't contain LMU setups.", "Bu klasörde LMU setup'ı yok.")}
 
 
 def launch_lmu() -> bool:

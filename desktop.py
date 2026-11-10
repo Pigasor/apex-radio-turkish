@@ -203,16 +203,16 @@ class Tray:
         v = self.state.voice
         item, sep = pystray.MenuItem, pystray.Menu.SEPARATOR
         return pystray.Menu(
-            item(lambda _: L("Ouvrir le tableau de bord", "Open the dashboard"), lambda: open_window(self.base), default=True),
-            item(lambda _: L("Vue téléphone : ", "Phone view: ") + self.phone.replace("http://", ""), lambda: open_window(self.phone)),
+            item(lambda _: L("Ouvrir le tableau de bord", "Open the dashboard", "Gösterge panelini aç"), lambda: open_window(self.base), default=True),
+            item(lambda _: L("Vue téléphone : ", "Phone view: ", "Telefon görünümü: ") + self.phone.replace("http://", ""), lambda: open_window(self.phone)),
             sep,
             item(lambda _: "Radio", lambda: _post(self.base + "/api/voice/toggle"), checked=lambda _: bool(v.enabled)),
-            item(lambda _: L("Silence (urgent seulement)", "Quiet (urgent only)"), lambda: _post(self.base + "/api/voice/quiet"),
+            item(lambda _: L("Silence (urgent seulement)", "Quiet (urgent only)", "Sessiz (yalnızca acil)"), lambda: _post(self.base + "/api/voice/quiet"),
                  checked=lambda _: bool(v.quiet)),
             sep,
-            item(lambda _: L("Ouvrir le journal (dépannage)", "Open the log (troubleshooting)"),
+            item(lambda _: L("Ouvrir le journal (dépannage)", "Open the log (troubleshooting)", "Günlüğü aç (sorun giderme)"),
                  lambda: os.startfile(LOCAL / "journal.txt") if hasattr(os, "startfile") else None),
-            item(lambda _: L("Quitter Apex Radio", "Quit Apex Radio"), self.quit),
+            item(lambda _: L("Quitter Apex Radio", "Quit Apex Radio", "Apex Radio'dan çık"), self.quit),
         )
 
     def quit(self) -> None:
@@ -231,7 +231,8 @@ class Tray:
             self.icon.notify(L("Apex Radio continue ici. Clique sur cette icône pour rouvrir le tableau de bord, "
                                "clic droit pour quitter.",
                                "Apex Radio keeps running here. Click this icon to reopen the dashboard, "
-                               "right-click to quit."), "Apex Radio")
+                               "right-click to quit.",
+                               "Apex Radio burada çalışmaya devam ediyor. Gösterge panelini yeniden açmak için bu simgeye tıkla, " "çıkmak için sağ tıkla."), "Apex Radio")
             self.cfg["tray_hint"] = True
             if self.save:
                 self.save(self.cfg)

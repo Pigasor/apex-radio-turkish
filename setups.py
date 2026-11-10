@@ -74,11 +74,19 @@ LABELS_EN = {
     "RideHeightSetting": "Ride height", "AntilockBrakeSystemMapSetting": "ABS",
 }
 SECTION_EN = {"FRONTLEFT": "FL", "FRONTRIGHT": "FR", "REARLEFT": "RL", "REARRIGHT": "RR"}
+LABELS_TR = {
+    "RearBrakeSetting": "Fren dengesi", "FrontAntiSwaySetting": "Ön viraj demiri",
+    "RearAntiSwaySetting": "Arka viraj demiri", "FWSetting": "Ön kanat", "RWSetting": "Arka kanat",
+    "TractionControlMapSetting": "Çekiş kontrolü", "DiffPowerSetting": "Diferansiyel (güç)",
+    "DiffCoastSetting": "Diferansiyel (boşta)", "CamberSetting": "Kamber", "PressureSetting": "Basınç",
+    "RideHeightSetting": "Sürüş yüksekliği", "AntilockBrakeSystemMapSetting": "ABS",
+}
+SECTION_TR = {"FRONTLEFT": "ön sol", "FRONTRIGHT": "ön sağ", "REARLEFT": "arka sol", "REARRIGHT": "arka sağ"}
 
 
 def label(section: str, key: str) -> str:
-    l = L(LABELS.get(key, key), LABELS_EN.get(key, key))
-    sec = L(SECTION_FR.get(section, ""), SECTION_EN.get(section, ""))
+    l = L(LABELS.get(key, key), LABELS_EN.get(key, key), LABELS_TR.get(key))
+    sec = L(SECTION_FR.get(section, ""), SECTION_EN.get(section, ""), SECTION_TR.get(section, ""))
     return f"{l} {sec}" if section in SECTION_FR else l
 
 
@@ -140,7 +148,8 @@ def FACTORY_MSG() -> str:
              "Apex le détectera tout seul et pourra créer le setup modifié.",
              "You're driving the default setup: it isn't saved as a file, so Apex can't change it. "
              "In the LMU garage, click Save and give it a name (for example \"Base\"). "
-             "Apex will pick it up automatically and can then create the modified setup.")
+             "Apex will pick it up automatically and can then create the modified setup.",
+             "Fabrika setup'ıyla sürüyorsun: dosya olarak kayıtlı olmadığı için Apex onu değiştiremez. " "LMU garajında Kaydet'e tıkla ve bir ad ver (örneğin \"Base\"). " "Apex onu kendiliğinden algılar ve değiştirilmiş setup'ı oluşturabilir.")
 
 
 # ===================================================================== voiture
@@ -423,7 +432,7 @@ class Workshop:
     def _live(self, s: Setup, live: dict) -> list[dict]:
         """Réglages changés dans la voiture pendant la session -> mêmes valeurs dans le fichier."""
         out = []
-        why = L("réglage fait en piste", "set on track")
+        why = L("réglage fait en piste", "set on track", "pistte ayarlandı")
         bf = live.get("bias_front")
         cur = s.get("CONTROLS", "RearBrakeSetting")
         if bf and cur:
@@ -444,7 +453,7 @@ class Workshop:
                         from_disp = known.get(idx, disp)
                         out.append({"section": "CONTROLS", "key": "RearBrakeSetting", "label": label("CONTROLS", "RearBrakeSetting"),
                                     "from": idx, "to": new, "from_disp": from_disp, "to_disp": to_disp, "live": True,
-                                    "why": L(f"{why} ({bf:.1f} % à l'avant)".replace(".", ","), f"{why} ({bf:.1f} % front)")})
+                                    "why": L(f"{why} ({bf:.1f} % à l'avant)".replace(".", ","), f"{why} ({bf:.1f} % front)", f"{why} (ön %{bf:.1f})")})
         for k, key in (("tc", "TractionControlMapSetting"), ("abs", "AntilockBrakeSystemMapSetting")):
             v, cur = live.get(k), s.get("CONTROLS", key)
             if not v or not cur:
@@ -453,7 +462,7 @@ class Workshop:
             if _num(disp) is None or int(_num(disp)) != idx or v == idx:
                 continue   # réglage absent sur cette voiture (N/A) ou déjà à la bonne valeur
             out.append({"section": "CONTROLS", "key": key, "label": label("CONTROLS", key), "from": idx, "to": v,
-                        "from_disp": disp, "to_disp": str(v), "live": True, "why": L(f"{why} (sur {v})", f"{why} ({v})")})
+                        "from_disp": disp, "to_disp": str(v), "live": True, "why": L(f"{why} (sur {v})", f"{why} ({v})", f"{why} ({v})")})
         return out
 
     def _fuel(self, s: Setup, fuel: dict) -> dict | None:
@@ -479,9 +488,9 @@ class Workshop:
         if new == idx:
             return None
         val = pts[ref] + (new - ref) * slope
-        return {"section": "GENERAL", "key": "FuelSetting", "label": L("Essence au départ", "Starting fuel"), "from": idx, "to": new,
+        return {"section": "GENERAL", "key": "FuelSetting", "label": L("Essence au départ", "Starting fuel", "Başlangıç yakıtı"), "from": idx, "to": new,
                 "from_disp": disp.split("(")[0].strip() or disp, "to_disp": f"{val:.1f}L", "fuel": True,
-                "why": L("essence pour la course : ", "fuel for the race: ") + fuel.get("why", "")}
+                "why": L("essence pour la course : ", "fuel for the race: ", "yarış için yakıt: ") + fuel.get("why", "")}
 
     def propose(self, track: str, issues: list, findings: list, live: dict | None = None,
                 fuel: dict | None = None) -> dict:
@@ -490,10 +499,10 @@ class Workshop:
         if self.factory:
             return {**st, "changes": [], "error": FACTORY_MSG()}
         if not st["folder"] or not st["current"]:
-            return {**st, "changes": [], "error": L("Choisis d'abord le setup que tu utilises.", "First choose the setup you're using.")}
+            return {**st, "changes": [], "error": L("Choisis d'abord le setup que tu utilises.", "First choose the setup you're using.", "Önce kullandığın setup'ı seç.")}
         path = self.dir / st["folder"] / st["current"]
         if not path.exists():
-            return {**st, "changes": [], "error": L("Fichier introuvable.", "File not found.")}
+            return {**st, "changes": [], "error": L("Fichier introuvable.", "File not found.", "Dosya bulunamadı.")}
         s = Setup(path)
         changes, used, conflict = [], set(), {}
         for ch in self._live(s, live or {}):      # ce que tu as réglé toi-même en piste passe en premier
@@ -552,14 +561,14 @@ class Workshop:
                     add("SUSPENSION", "RearAntiSwaySetting", -1, why)
 
         sym = (s.get("GENERAL", "Symmetric") or (0,))[0] == 1
-        names = L("avant gauche|avant droit|arrière gauche|arrière droit", "front left|front right|rear left|rear right").split("|")
+        names = L("avant gauche|avant droit|arrière gauche|arrière droit", "front left|front right|rear left|rear right", "ön sol|ön sağ|arka sol|arka sağ").split("|")
         for kind, i in findings:
             wheels = [i] if i is not None else []
             if sym and i is not None:
                 wheels = [i, i ^ 1]   # même réglage des deux côtés
             for wi in wheels:
                 sec = WHEEL_SECTIONS[wi]
-                why = L(f"températures du pneu {names[i]}", f"{names[i]} tyre temperatures") if i is not None else L("fond plat qui touche", "floor bottoming")
+                why = L(f"températures du pneu {names[i]}", f"{names[i]} tyre temperatures", f"{names[i]} lastik sıcaklıkları") if i is not None else L("fond plat qui touche", "floor bottoming", "taban yere sürtüyor")
                 if kind in ("camber_less", "camber_more"):
                     # valeur affichée négative : "moins de carrossage" = valeur qui monte vers 0
                     d = self._direction(s, sec, "CamberSetting", +1)
@@ -570,7 +579,7 @@ class Workshop:
             if kind == "ride_up":
                 for sec in WHEEL_SECTIONS:
                     d = self._direction(s, sec, "RideHeightSetting", +1)
-                    add(sec, "RideHeightSetting", d, L("fond plat qui touche", "floor bottoming"))
+                    add(sec, "RideHeightSetting", d, L("fond plat qui touche", "floor bottoming", "taban yere sürtüyor"))
 
         return {**st, "vehicle": s.vehicle, "changes": changes, "error": None}
 
@@ -580,14 +589,15 @@ class Workshop:
         Chaque version est aussi copiée dans setup_backups/ pour pouvoir revenir en arrière."""
         st = self.state(track)
         if not st["folder"] or not st["current"] or not changes:
-            return {"error": L("Rien à créer.", "Nothing to create.")}
+            return {"error": L("Rien à créer.", "Nothing to create.", "Oluşturulacak bir şey yok.")}
         folder = self.dir / st["folder"]
         base = Setup(folder / st["current"])
         name = self.apex_name(st["folder"], base)
         apex = folder / name
         if apex.exists() and not Setup(apex).is_apex():
             return {"error": L(f"Un fichier « {name} » existe déjà et n'a pas été créé par Apex Radio : je n'y touche pas.",
-                               f"A file \"{name}\" already exists and wasn't created by Apex Radio: I won't touch it.")}
+                               f"A file \"{name}\" already exists and wasn't created by Apex Radio: I won't touch it.",
+                               f"\"{name}\" adlı bir dosya zaten var ve Apex Radio tarafından oluşturulmamış: ona dokunmuyorum.")}
         h = self.history.setdefault(self._hkey(st["folder"]), {"versions": [], "results": {}})
         bdir = BACKUPS / re.sub(r"[^A-Za-z0-9_-]+", "_", f"{st['folder']}_{self.mode}")
         bdir.mkdir(parents=True, exist_ok=True)
@@ -608,7 +618,8 @@ class Workshop:
             return {"error": L("Windows refuse l'écriture dans le dossier des setups. "
                                "Lance Apex Radio en administrateur, ou déplace LMU hors de Program Files.",
                                "Windows won't allow writing to the setups folder. "
-                               "Run Apex Radio as administrator, or move LMU out of Program Files.")}
+                               "Run Apex Radio as administrator, or move LMU out of Program Files.",
+                               "Windows setup klasörüne yazmaya izin vermiyor. " "Apex Radio'yu yönetici olarak çalıştır ya da LMU'yu Program Files dışına taşı.")}
         shutil.copyfile(apex, bdir / f"v{n}.svm")
         h["versions"].append({"version": n, "label": f"v{n}", "base": from_label, "date": time.strftime("%d/%m/%Y %H:%M"),
                               "backup": str(bdir / f"v{n}.svm"),
@@ -624,17 +635,18 @@ class Workshop:
         h = self.history.get(self._hkey(st["folder"]), {})
         v = next((x for x in h.get("versions", []) if x["version"] == version), None)
         if not v or not Path(v["backup"]).exists():
-            return {"error": L("Version introuvable.", "Version not found.")}
+            return {"error": L("Version introuvable.", "Version not found.", "Sürüm bulunamadı.")}
         name = self.apex_name(st["folder"], Setup(Path(v["backup"])))
         apex = self.dir / st["folder"] / name
         if apex.exists() and not Setup(apex).is_apex():
             return {"error": L(f"« {name} » n'a pas été créé par Apex Radio : je n'y touche pas.",
-                               f"\"{name}\" wasn't created by Apex Radio: I won't touch it.")}
+                               f"\"{name}\" wasn't created by Apex Radio: I won't touch it.",
+                               f"\"{name}\" Apex Radio tarafından oluşturulmamış: ona dokunmuyorum.")}
         src = Setup(Path(v["backup"]))
         try:
             src.write_copy(apex, [], f"Apex Radio {self.mode} v{version} (version restaurée)", overwrite=apex.exists())
         except PermissionError:
-            return {"error": L("Windows refuse l'écriture dans le dossier des setups.", "Windows won't allow writing to the setups folder.")}
+            return {"error": L("Windows refuse l'écriture dans le dossier des setups.", "Windows won't allow writing to the setups folder.", "Windows setup klasörüne yazmaya izin vermiyor.")}
         h["current"], h["apex_file"], h["apex_label"] = name, name, f"v{version}"
         self._save()
         return {"file": name, "version": f"v{version}", "error": None}

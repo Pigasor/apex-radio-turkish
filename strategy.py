@@ -206,7 +206,7 @@ class Engineer:
             self.plan = p          # juste après l'arrêt : on attend un tour propre avant de parler essence
             return p
         if p.stops_needed == 0:
-            self.say("once:enough", L("Tu as ce qu'il faut pour aller au bout, pas besoin de rentrer.", "You've got enough to make the finish, no need to pit."), elapsed=et)
+            self.say("once:enough", L("Tu as ce qu'il faut pour aller au bout, pas besoin de rentrer.", "You've got enough to make the finish, no need to pit.", "Yakıt sona kadar yetiyor, pite girmene gerek yok."), elapsed=et)
             self.plan = p
             return p
 
@@ -216,7 +216,8 @@ class Engineer:
         if p.save_per_lap and 0.1 <= p.save_per_lap <= 0.15 * fpl and p.laps_to_finish >= 3:
             self.say("stint:save",
                      L(f"Il manque un peu d'essence pour finir. Si tu économises {p.save_per_lap:.1f} litre par tour, on évite l'arrêt.",
-                       f"We're a little short on fuel. Save {p.save_per_lap:.1f} litres a lap and we can skip the stop."),
+                       f"We're a little short on fuel. Save {p.save_per_lap:.1f} litres a lap and we can skip the stop.",
+                       f"Yakıt biraz eksik. Tur başına {p.save_per_lap:.1f} litre tasarruf edersen pit stopu atlayabiliriz."),
                      elapsed=et)
 
         # tour d'arrêt
@@ -256,21 +257,21 @@ class Engineer:
         parts = []
         if p.fuel_to_add is not None:
             n = round(p.fuel_to_add)
-            parts.append(L(f"{n} litre{'s' if n > 1 else ''}", f"{n} litre{'s' if n != 1 else ''} of fuel"))
+            parts.append(L(f"{n} litre{'s' if n > 1 else ''}", f"{n} litre{'s' if n != 1 else ''} of fuel", f"{n} litre yakıt"))
         if p.energy_target is not None:
-            parts.append(L(f"énergie à {p.energy_target * 100:.0f} %", f"energy to {p.energy_target * 100:.0f} %"))
+            parts.append(L(f"énergie à {p.energy_target * 100:.0f} %", f"energy to {p.energy_target * 100:.0f} %", f"enerji %{p.energy_target * 100:.0f}"))
         if p.tyre_compound == "pluie":
-            parts.append(L("pneus pluie", "wet tyres"))
+            parts.append(L("pneus pluie", "wet tyres", "yağmur lastiği"))
         elif p.tyre_compound == "slicks":
-            parts.append(L("retour en slicks", "back to slicks"))
+            parts.append(L("retour en slicks", "back to slicks", "slick lastiğe dönüş"))
         elif p.change_tyres:
-            parts.append(L("4 pneus neufs", "four new tyres"))
+            parts.append(L("4 pneus neufs", "four new tyres", "dört yeni lastik"))
         elif p.change_tyres is False:
-            parts.append(L("on garde les pneus", "we keep the tyres"))
+            parts.append(L("on garde les pneus", "we keep the tyres", "lastikler kalıyor"))
         if p.repair:
-            parts.append(L("et on répare tout", "and full repairs") if p.repair_all else L("et on répare la carrosserie", "and we fix the bodywork"))
+            parts.append(L("et on répare tout", "and full repairs", "ve tam onarım") if p.repair_all else L("et on répare la carrosserie", "and we fix the bodywork", "ve kaporta onarımı"))
         elif p.no_repair:
-            parts.append(L("et on ne répare pas", "and no repairs"))
+            parts.append(L("et on ne répare pas", "and no repairs", "ve onarım yok"))
         return ", ".join(parts)
 
     def _pit_calls(self, s: Snapshot, p: Plan) -> None:
@@ -278,17 +279,19 @@ class Engineer:
         if p.laps_until_box is None or s.in_pits or s.game_phase == 8:   # 8 = drapeau à damier : plus d'arrêt
             return
         if p.laps_until_box <= 1:
-            self.say("stint:box", L(f"Box, box ce tour ! On met {self._pit_service(p)}.", f"Box, box this lap! {self._pit_service(p)}."), urgent=True, elapsed=et)
+            self.say("stint:box", L(f"Box, box ce tour ! On met {self._pit_service(p)}.", f"Box, box this lap! {self._pit_service(p)}.", f"Box, box, bu tur! {self._pit_service(p)}."), urgent=True, elapsed=et)
         elif p.laps_until_box <= 3:
             self.say("stint:box3", L(f"Arrêt dans {p.laps_until_box} tours. Prévu : {self._pit_service(p)}.",
-                                     f"Pit stop in {p.laps_until_box} laps. Plan: {self._pit_service(p)}."), elapsed=et)
+                                     f"Pit stop in {p.laps_until_box} laps. Plan: {self._pit_service(p)}.",
+                                     f"{p.laps_until_box} tur sonra pit stop. Plan: {self._pit_service(p)}."), elapsed=et)
         if not ("stint:plan" in self._said):
-            lim = L("l'énergie", "energy") if p.limited_by == "énergie" else L("l'essence", "fuel")
+            lim = L("l'énergie", "energy", "enerji") if p.limited_by == "énergie" else L("l'essence", "fuel", "yakıt")
             self.say("stint:plan",
                      L(f"Conso {p.fuel_per_lap:.1f} litres par tour. Autonomie {p.range_laps:.1f} tours, c'est {lim} qui limite. "
                        f"Il faudra {p.stops_needed} arrêt{'s' if p.stops_needed > 1 else ''}.",
                        f"Using {p.fuel_per_lap:.1f} litres a lap. Range {p.range_laps:.1f} laps, {lim} is the limit. "
-                       f"We need {p.stops_needed} stop{'s' if p.stops_needed > 1 else ''}."),
+                       f"We need {p.stops_needed} stop{'s' if p.stops_needed > 1 else ''}.",
+                       f"Tur başına {p.fuel_per_lap:.1f} litre harcıyorsun. Menzil {p.range_laps:.1f} tur, sınırlayan {lim}. " f"{p.stops_needed} pit stop gerekiyor."),
                      elapsed=et)
 
     def _weather(self, s: Snapshot, p: Plan) -> None:
@@ -296,35 +299,38 @@ class Engineer:
         wet = s.wetness > 0.35 or s.raining > 0.3
         dry = s.wetness < 0.12 and s.raining < 0.05
         if s.raining > 0.1 and not self._was_wet:
-            self.say(None, L("Il commence à pleuvoir, attention à l'adhérence.", "It's starting to rain, watch the grip."), elapsed=et)
+            self.say(None, L("Il commence à pleuvoir, attention à l'adhérence.", "It's starting to rain, watch the grip.", "Yağmur başlıyor, yol tutuşa dikkat."), elapsed=et)
             self._was_wet = True
         if dry:
             self._was_wet = False
         running = s.game_phase == 5 and not s.in_pits and s.laps_done >= 1
         if not running:
-            p.weather = L(f"Pluie {s.raining * 100:.0f} %", f"Rain {s.raining * 100:.0f} %") if s.raining > 0.05 else L("Sec", "Dry")
+            p.weather = L(f"Pluie {s.raining * 100:.0f} %", f"Rain {s.raining * 100:.0f} %", f"Yağmur %{s.raining * 100:.0f}") if s.raining > 0.05 else L("Sec", "Dry", "Kuru")
             return
         if wet and not s.wet_tyres:
             p.tyre_compound = "pluie"
-            p.weather = L("Piste mouillée — pneus pluie conseillés", "Wet track — wets recommended")
+            p.weather = L("Piste mouillée — pneus pluie conseillés", "Wet track — wets recommended", "Islak pist — yağmur lastiği önerilir")
             self.say("stint:wets", L("La piste est bien mouillée, on passe en pneus pluie au prochain arrêt.",
-                                     "Track's properly wet, we go to wets at the next stop."), elapsed=et)
+                                     "Track's properly wet, we go to wets at the next stop.",
+                                     "Pist iyice ıslandı, bir sonraki pit stopta yağmur lastiğine geçiyoruz."), elapsed=et)
         elif dry and s.wet_tyres:
             p.tyre_compound = "slicks"
-            p.weather = L("Piste sèche — repasser en slicks", "Drying track — back to slicks")
+            p.weather = L("Piste sèche — repasser en slicks", "Drying track — back to slicks", "Kuruyan pist — slick lastiğe dönüş")
             self.say("stint:slicks", L("La piste sèche, on repasse en slicks au prochain arrêt.",
-                                       "Track is drying, back to slicks at the next stop."), elapsed=et)
+                                       "Track is drying, back to slicks at the next stop.",
+                                       "Pist kuruyor, bir sonraki pit stopta slick lastiğe dönüyoruz."), elapsed=et)
         elif s.raining > 0.05:
             p.weather = L(f"Pluie {s.raining * 100:.0f} %, piste humide à {s.wetness * 100:.0f} %",
-                          f"Rain {s.raining * 100:.0f} %, track {s.wetness * 100:.0f} % wet")
+                          f"Rain {s.raining * 100:.0f} %, track {s.wetness * 100:.0f} % wet",
+                          f"Yağmur %{s.raining * 100:.0f}, pist %{s.wetness * 100:.0f} ıslak")
         else:
-            p.weather = L("Sec", "Dry")
+            p.weather = L("Sec", "Dry", "Kuru")
 
     def _flags(self, s: Snapshot) -> None:
         if s.yellow and not self._was_yellow:
-            self.say(None, L("Neutralisation ! Drapeau jaune, ralentis.", "Full course yellow! Slow down."), urgent=True, elapsed=s.elapsed)
+            self.say(None, L("Neutralisation ! Drapeau jaune, ralentis.", "Full course yellow! Slow down.", "Tüm pistte sarı bayrak! Yavaşla."), urgent=True, elapsed=s.elapsed)
         if not s.yellow and self._was_yellow:
-            self.say(None, L("Fin de neutralisation, la course reprend.", "Yellow's over, we're racing again."), elapsed=s.elapsed)
+            self.say(None, L("Fin de neutralisation, la course reprend.", "Yellow's over, we're racing again.", "Sarı bayrak bitti, yarış devam ediyor."), elapsed=s.elapsed)
         self._was_yellow = s.yellow
         if s.done:
-            self.say("once:finish", L("Drapeau à damier ! Bien joué.", "Chequered flag! Well done."), elapsed=s.elapsed)
+            self.say("once:finish", L("Drapeau à damier ! Bien joué.", "Chequered flag! Well done.", "Damalı bayrak! Tebrikler."), elapsed=s.elapsed)

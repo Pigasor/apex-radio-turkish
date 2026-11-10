@@ -47,7 +47,7 @@
   <div class="grid" id="dash" hidden>
     <div id="pen" role="alert"></div>
     <div class="card" id="call"><div class="lab" data-en="Call">Consigne</div><div class="val" id="calltitle">–</div><div class="sub" id="calltext"></div></div>
-    <div class="card"><div class="lab">Position</div><div class="val" id="pos">–</div><div class="sub" id="gaps"></div></div>
+    <div class="card"><div class="lab" data-en="Position">Position</div><div class="val" id="pos">–</div><div class="sub" id="gaps"></div></div>
     <div class="card"><div class="lab" data-en="Lap">Tour</div><div class="val" id="lap">–</div><div class="sub" id="lapsub"></div></div>
     <div class="card"><div class="lab">Delta</div><div class="val" id="delta">–</div><div class="sub" id="deltasub"></div></div>
     <div class="card"><div class="lab" data-en="Fuel">Essence</div><div class="val" id="fuel">–</div><div class="sub" id="fuelsub"></div></div>
@@ -61,10 +61,18 @@
 <script>
 const $ = id => document.getElementById(id);
 let LANG = "fr";
-const T = (fr, en) => LANG === "en" ? en : fr;
+const TR = {
+  "Waiting for the game…": "Oyun bekleniyor…", "Call": "Talimat", "Lap": "Tur", "Fuel": "Yakıt", "DEBRIEFS": "ÖZETLER",
+  "FULL · WORKSHOP": "TAM · ATÖLYE", "game detected": "oyun algılandı", "waiting for the game": "oyun bekleniyor",
+  "ON TRACK": "PİSTTE", "YELLOW": "SARI BAYRAK", "Pit this lap": "Bu tur pite gir", "CHEQUERED": "DAMALI BAYRAK",
+  "ahead": "önde", "behind": "arkada", "left": "kalan", "no reference": "referans yok", "best lap": "en iyi tur",
+  "laps": "tur", "PENALTY TO SERVE": "ÇEKİLECEK CEZA", "LAP": "TUR", "PC unreachable": "PC'ye ulaşılamıyor", "Position": "Pozisyon", "record": "rekor",
+};
+const SESSION_TR = { course: "yarış", qualif: "sıralama", essais: "antrenman", warmup: "ısınma" };
+const T = (fr, en, tr) => LANG === "fr" ? fr : LANG === "tr" ? (tr ?? TR[en] ?? en) : en;
 function applyLang() {
   document.documentElement.lang = LANG;
-  document.querySelectorAll("[data-en]").forEach(el => { if (el.dataset.fr === undefined) el.dataset.fr = el.innerHTML; el.innerHTML = LANG === "en" ? el.dataset.en : el.dataset.fr; });
+  document.querySelectorAll("[data-en]").forEach(el => { if (el.dataset.fr === undefined) el.dataset.fr = el.innerHTML; el.innerHTML = T(el.dataset.fr, el.dataset.en); });
 }
 const SESSION_EN = { course: "race", qualif: "qualifying", essais: "practice", warmup: "warm-up" };
 const fmtTime = s => { if (s == null) return "–"; const m = Math.floor(s / 60), r = Math.floor(s % 60); return `${m}:${String(r).padStart(2, "0")}`; };
@@ -81,15 +89,15 @@ function render(d) {
   if (d.update && d.update.version) $("ver").textContent = "v" + d.update.version;
   const up = d.update || {};
   $("upd").style.display = up.latest ? "block" : "none";
-  if (up.latest) $("upd").textContent = T(`Mise à jour ${up.latest} disponible : télécharge-la sur le PC`, `Update ${up.latest} available: download it on the PC`);
+  if (up.latest) $("upd").textContent = T(`Mise à jour ${up.latest} disponible : télécharge-la sur le PC`, `Update ${up.latest} available: download it on the PC`, `${up.latest} güncellemesi hazır: PC'den indir`);
   $("wait").hidden = !!s.on_track; $("dash").hidden = !s.on_track;
-  $("sess").textContent = s.on_track ? `${s.track} · ${T(s.session, SESSION_EN[s.session] || s.session)}` : (s.connected ? T("jeu détecté", "game detected") : T("en attente du jeu", "waiting for the game"));
+  $("sess").textContent = s.on_track ? `${s.track} · ${T(s.session, SESSION_EN[s.session] || s.session, SESSION_TR[s.session])}` : (s.connected ? T("jeu détecté", "game detected") : T("en attente du jeu", "waiting for the game"));
   if (!s.on_track) return;
   const last = radio.find(m => !m.me);
   let title = T("EN PISTE", "ON TRACK"), text = "", alert = false;
   if (s.yellow) { title = T("NEUTRALISATION", "YELLOW"); alert = true; }
   else if (p.ready && p.stops_needed > 0 && p.laps_until_box <= 1) { title = "BOX BOX"; alert = true; text = T("Rentre ce tour", "Pit this lap"); }
-  else if (p.ready && p.stops_needed > 0 && p.laps_until_box <= 3) { title = T(`BOX DANS ${p.laps_until_box}`, `BOX IN ${p.laps_until_box}`); text = T(`fin du tour ${p.box_lap}`, `end of lap ${p.box_lap}`); }
+  else if (p.ready && p.stops_needed > 0 && p.laps_until_box <= 3) { title = T(`BOX DANS ${p.laps_until_box}`, `BOX IN ${p.laps_until_box}`, `${p.laps_until_box} TUR SONRA BOX`); text = T(`fin du tour ${p.box_lap}`, `end of lap ${p.box_lap}`, `${p.box_lap}. turun sonu`); }
   else if (s.game_phase === 8) title = T("DAMIER", "CHEQUERED");
   $("calltitle").textContent = title; $("calltext").textContent = text; $("call").className = "card" + (alert ? " alert" : "");
   $("pos").textContent = `P${s.class_position || s.position || "–"}`;
@@ -100,12 +108,12 @@ function render(d) {
   const t = d.times || {}, dl = t.delta;
   $("delta").textContent = dl == null ? "–" : `${dl > 0 ? "+" : dl < 0 ? "−" : "±"}${Math.abs(dl).toFixed(2)}`;
   $("delta").className = "val" + (dl == null ? "" : dl < -0.02 ? " fast" : dl > 0.02 ? " slow" : "");
-  $("deltasub").textContent = dl == null ? T("pas de référence", "no reference") : `vs ${t.delta_ref === "record" ? "record" : T("meilleur tour", "best lap")}`;
+  $("deltasub").textContent = dl == null ? T("pas de référence", "no reference") : `vs ${t.delta_ref === "record" ? T("record", "record") : T("meilleur tour", "best lap")}`;
   $("fuel").textContent = p.range_laps != null ? `${p.range_laps.toFixed(1)}` : `${(s.fuel || 0).toFixed(0)} L`;
   $("fuelsub").textContent = p.range_laps != null ? `${T("tours", "laps")} · ${(s.fuel || 0).toFixed(1)} L` : "";
   const pn = d.penalty || {};
   $("pen").style.display = pn.count ? "block" : "none";
-  if (pn.count) $("pen").textContent = `${T("PÉNALITÉ À PURGER", "PENALTY TO SERVE")}${pn.laps_left != null ? ` · ${pn.laps_left} ${T("TOUR", "LAP")}${pn.laps_left > 1 ? "S" : ""}` : ""}`;
+  if (pn.count) $("pen").textContent = `${T("PÉNALITÉ À PURGER", "PENALTY TO SERVE")}${pn.laps_left != null ? ` · ${pn.laps_left} ${T("TOUR", "LAP")}${pn.laps_left > 1 && LANG !== "tr" ? "S" : ""}` : ""}`;
   $("last").textContent = last ? last.text : "–";
 }
 async function tick() {

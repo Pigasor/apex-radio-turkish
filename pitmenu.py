@@ -64,7 +64,7 @@ def plan_menu(menu: list, fuel_total: float | None, tyres: str | None, compound:
             idx, lit = min(ok, key=lambda o: o[1]) if ok else max(opts, key=lambda o: o[1])
             if it["currentSetting"] != idx:
                 it["currentSetting"] = idx
-            changes.append(L(f"essence à {lit:.0f} litres", f"fuel to {lit:.0f} litres"))
+            changes.append(L(f"essence à {lit:.0f} litres", f"fuel to {lit:.0f} litres", f"yakıt {lit:.0f} litre"))
     it = _item(menu, TIRES)
     if it and tyres:
         idx = 0
@@ -86,8 +86,8 @@ def plan_menu(menu: list, fuel_total: float | None, tyres: str | None, compound:
                             and "INVALID" not in s.get("text", "").upper()), 0)
         it["currentSetting"] = idx
         typ = (it["settings"][idx].get("type") or "") if idx else ""
-        changes.append(L("on garde les pneus", "keep the tyres") if idx == 0 else L("pneus pluie neufs", "new wet tyres") if typ == "Wet"
-                       else L(f"pneus neufs {typ.lower()}", f"new {typ.lower()} tyres").strip())
+        changes.append(L("on garde les pneus", "keep the tyres", "lastikler kalıyor") if idx == 0 else L("pneus pluie neufs", "new wet tyres", "yeni yağmur lastiği") if typ == "Wet"
+                       else L(f"pneus neufs {typ.lower()}", f"new {typ.lower()} tyres", f"yeni {typ.lower()} lastik").strip())
     it = _item(menu, DAMAGE)
     if it and repair:
         print(f"  Menu stand, réparations possibles : {[s.get('text') for s in it.get('settings', [])]}")
@@ -101,12 +101,12 @@ def plan_menu(menu: list, fuel_total: float | None, tyres: str | None, compound:
         pick = pick or (opts[-1] if want_all and opts else opts[0] if opts else None)
         if pick:
             it["currentSetting"] = pick[0]
-            changes.append(L("on répare tout", "full repairs") if want_all else L("réparation de la carrosserie", "bodywork repairs"))
+            changes.append(L("on répare tout", "full repairs", "tam onarım") if want_all else L("réparation de la carrosserie", "bodywork repairs", "kaporta onarımı"))
     if it and repair is False and len(it["settings"]) > 1:   # le pilote a dit « pas de réparation »
         idx = next((i for i, s in enumerate(it["settings"])
                     if any(n in s.get("text", "").lower() for n in ("ne pas", "pas de", "not", "no ", "none", "aucun"))), 0)
         it["currentSetting"] = idx
-        changes.append(L("pas de réparation", "no repairs"))
+        changes.append(L("pas de réparation", "no repairs", "onarım yok"))
     return menu, changes
 
 
@@ -148,13 +148,13 @@ class PitCrew:
         try:
             if self.demo:
                 time.sleep(0.5)
-                txt = ", ".join(x for x in [L(f"essence à {fuel_total:.0f} litres", f"fuel to {fuel_total:.0f} litres") if fuel_total else "",
-                                            {"keep": L("on garde les pneus", "keep the tyres"), "same": L("pneus neufs", "new tyres"),
-                                             "Wet": L("pneus pluie", "wet tyres"), "dry": L("pneus slicks", "slick tyres")}.get(tyres, ""),
-                                            (L("on répare tout", "full repairs") if repair == "all" else L("réparation de la carrosserie", "bodywork repairs")) if repair
-                                            else L("pas de réparation", "no repairs") if repair is False else ""] if x)
-                self.status = L(f"✓ Réglé (démo) : {txt}", f"✓ Set (demo): {txt}")
-                self._say(L(f"Stand réglé : {txt}.", f"Pit menu set: {txt}."))
+                txt = ", ".join(x for x in [L(f"essence à {fuel_total:.0f} litres", f"fuel to {fuel_total:.0f} litres", f"yakıt {fuel_total:.0f} litre") if fuel_total else "",
+                                            {"keep": L("on garde les pneus", "keep the tyres", "lastikler kalıyor"), "same": L("pneus neufs", "new tyres", "yeni lastik"),
+                                             "Wet": L("pneus pluie", "wet tyres", "yağmur lastiği"), "dry": L("pneus slicks", "slick tyres", "slick lastik")}.get(tyres, ""),
+                                            (L("on répare tout", "full repairs", "tam onarım") if repair == "all" else L("réparation de la carrosserie", "bodywork repairs", "kaporta onarımı")) if repair
+                                            else L("pas de réparation", "no repairs", "onarım yok") if repair is False else ""] if x)
+                self.status = L(f"✓ Réglé (démo) : {txt}", f"✓ Set (demo): {txt}", f"✓ Ayarlandı (demo): {txt}")
+                self._say(L(f"Stand réglé : {txt}.", f"Pit menu set: {txt}.", f"Pit menüsü ayarlandı: {txt}."))
                 return
             menu = read_menu()
             if not menu:
@@ -167,19 +167,21 @@ class PitCrew:
                    if (c := _item(check, it["PMC Value"])) and c["currentSetting"] != it["currentSetting"]
                    and it["PMC Value"] in (FUEL, TIRES, DAMAGE)]
             if bad:
-                self.status = L("⚠ Menu non pris en compte : ", "⚠ Menu not applied: ") + ", ".join(bad)
+                self.status = L("⚠ Menu non pris en compte : ", "⚠ Menu not applied: ", "⚠ Menü uygulanmadı: ") + ", ".join(bad)
                 self._say(L("Attention, je n'ai pas réussi à régler tout le menu des stands, vérifie-le.",
-                            "Careful, I couldn't set the whole pit menu, check it."))
+                            "Careful, I couldn't set the whole pit menu, check it.",
+                            "Dikkat, pit menüsünün tamamını ayarlayamadım, kontrol et."))
                 print(f"  Menu stand : écart après écriture sur {bad} (statut {status})")
             else:
-                self.status = L("✓ Réglé : ", "✓ Set: ") + ", ".join(changes)
-                self._say(L("Stand réglé : ", "Pit menu set: ") + ", ".join(changes) + ".")
+                self.status = L("✓ Réglé : ", "✓ Set: ", "✓ Ayarlandı: ") + ", ".join(changes)
+                self._say(L("Stand réglé : ", "Pit menu set: ", "Pit menüsü ayarlandı: ") + ", ".join(changes) + ".")
                 print(f"  Menu stand réglé : {changes}")
         except Exception as e:
-            self.status = L(f"⚠ Impossible de régler le menu ({e.__class__.__name__})", f"⚠ Couldn't set the menu ({e.__class__.__name__})")
+            self.status = L(f"⚠ Impossible de régler le menu ({e.__class__.__name__})", f"⚠ Couldn't set the menu ({e.__class__.__name__})", f"⚠ Menü ayarlanamadı ({e.__class__.__name__})")
             print(f"  Menu stand : erreur {e!r}")
             self._say(L("Je n'arrive pas à régler le menu des stands, fais-le à la main cette fois.",
-                        "I can't set the pit menu, do it manually this time."))
+                        "I can't set the pit menu, do it manually this time.",
+                        "Pit menüsünü ayarlayamıyorum, bu sefer elle yap."))
         finally:
             self.busy = False
 

@@ -36,8 +36,8 @@ class Incidents:
             # hors virage : on donne le virage qui suit
             corners = self.beh.map.corners()
             nxt = min(corners, key=lambda k: (k["start"] - f) % 1, default=None)
-            return L(f"avant le virage {nxt['id']}", f"before turn {nxt['id']}") if nxt else L("sur la piste", "on track")
-        return L(f"au virage {c}", f"at turn {c}") if c else L("sur la piste", "on track")
+            return L(f"avant le virage {nxt['id']}", f"before turn {nxt['id']}", f"{nxt['id']}. virajdan önce") if nxt else L("sur la piste", "on track", "pistte")
+        return L(f"au virage {c}", f"at turn {c}", f"{c}. virajda") if c else L("sur la piste", "on track", "pistte")
 
     def update(self, s) -> None:
         if not s.on_track or s.game_phase not in (5, 6) or s.in_pits or s.session == "qualif":
@@ -88,6 +88,6 @@ class Incidents:
             return
         self.said[where] = self.said["*"] = now
         if kind == "arrêt":
-            self.say(None, L(f"Attention, voiture arrêtée {where} !", f"Caution, car stopped {where}!"), urgent=True)
+            self.say(None, L(f"Attention, voiture arrêtée {where} !", f"Caution, car stopped {where}!", f"Dikkat, {where} duran araç var!"), urgent=True)
         else:
-            self.say(None, L(f"Voiture hors piste {where}, attention.", f"Car off {where}, caution."), urgent=True)
+            self.say(None, L(f"Voiture hors piste {where}, attention.", f"Car off {where}, caution.", f"{where} pist dışına çıkan araç var, dikkat."), urgent=True)

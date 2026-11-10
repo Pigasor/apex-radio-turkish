@@ -35,7 +35,7 @@ def set_encourage(level: str) -> None:
 
 
 def WHEEL_NAME(i: int) -> str:
-    return L("avant gauche|avant droite|arrière gauche|arrière droite", "front left|front right|rear left|rear right").split("|")[i]
+    return L("avant gauche|avant droite|arrière gauche|arrière droite", "front left|front right|rear left|rear right", "ön sol|ön sağ|arka sol|arka sağ").split("|")[i]
 
 
 def class_name(c: str) -> str:
@@ -44,14 +44,14 @@ def class_name(c: str) -> str:
                       ("LMP2", "LMP2"), ("LMP3", "LMP3")):
         if key in u:
             return name
-    return c or L("voiture", "car")
+    return c or L("voiture", "car", "araç")
 
 
 def _dix(x: float) -> str:
     d = round(abs(x) * 10)
     if d >= 10:
-        return dec(L(f"{abs(x):.1f} seconde", f"{abs(x):.1f} seconds"))
-    return L(f"{max(1, d)} dixième" + ("s" if d > 1 else ""), f"{max(1, d)} tenth" + ("s" if d > 1 else ""))
+        return dec(L(f"{abs(x):.1f} seconde", f"{abs(x):.1f} seconds", f"{abs(x):.1f} saniye"))
+    return L(f"{max(1, d)} dixième" + ("s" if d > 1 else ""), f"{max(1, d)} tenth" + ("s" if d > 1 else ""), f"onda {max(1, d)} saniye")
 
 
 # ======================================================================= 1. spotter
@@ -113,8 +113,8 @@ class Spotter:
     def _set(self, left: bool, right: bool, now: float, quiet: bool = False) -> None:
         state = "both" if left and right else "left" if left else "right" if right else "clear"
         if state != self.state and not quiet:
-            msg = {"both": L("Des deux côtés !", "Three wide!"), "left": L("À gauche !", "Car left!"),
-                   "right": L("À droite !", "Car right!"), "clear": L("Dégagé.", "Clear.")}[state]
+            msg = {"both": L("Des deux côtés !", "Three wide!", "Üç araç yan yana!"), "left": L("À gauche !", "Car left!", "Solda araç!"),
+                   "right": L("À droite !", "Car right!", "Sağda araç!"), "clear": L("Dégagé.", "Clear.", "Temiz.")}[state]
             # pas deux fois la même annonce en quelques secondes ; « dégagé » seulement après une vraie annonce
             if now - self.last_said.get(state, -99) >= self.SAME_SIDE_GAP and (state != "clear" or self.state != "clear"):
                 self.last_said[state] = now
@@ -168,10 +168,11 @@ class Traffic:
                 if 1.0 < gap < 3.0 and prev is not None and prev > gap and now - self.said.get(key, -999) > 90:
                     self.said[key] = self.last = now
                     catch = gap / -delta
-                    when = L("elle sera sur toi dans ce tour", "it'll be on you this lap") if catch < 1 else \
-                        L(f"elle sera sur toi dans {math.ceil(catch)} tours", f"it'll be on you in {math.ceil(catch)} laps")
+                    when = L("elle sera sur toi dans ce tour", "it'll be on you this lap", "bu tur sana yetişir") if catch < 1 else \
+                        L(f"elle sera sur toi dans {math.ceil(catch)} tours", f"it'll be on you in {math.ceil(catch)} laps", f"{math.ceil(catch)} tur sonra sana yetişir")
                     say(None, L(f"{name} qui arrive derrière, {gap:.0f} seconde{'s' if round(gap) > 1 else ''}, {when}.",
-                                f"{name} coming up behind, {gap:.0f} second{'s' if round(gap) != 1 else ''}, {when}."))
+                                f"{name} coming up behind, {gap:.0f} second{'s' if round(gap) != 1 else ''}, {when}.",
+                                f"Arkadan {name} geliyor, {gap:.0f} saniye geride, {when}."))
         self._slower_ahead(s, me, pace, mine, speed, now, say)
 
     def _slower_ahead(self, s, me, pace, mine, speed, now, say) -> None:
@@ -209,16 +210,16 @@ class Traffic:
             self.last = now
             name = class_name(c["cls"])
             corner = self.beh.corner_at((me["f"] + t * speed / L) % 1) if self.beh else None
-            where = L_(f", tu la rattrapes au virage {corner}", f", you'll catch it at turn {corner}") if corner else ""
+            where = L_(f", tu la rattrapes au virage {corner}", f", you'll catch it at turn {corner}", f", {corner}. virajda yakalarsın") if corner else ""
             if gap < 1.0:
-                sec = L_("moins d'une seconde", "less than a second")
+                sec = L_("moins d'une seconde", "less than a second", "bir saniyeden az")
             else:
-                sec = L_(f"{gap:.0f} seconde{'s' if round(gap) > 1 else ''}", f"{gap:.0f} second{'s' if round(gap) != 1 else ''}")
+                sec = L_(f"{gap:.0f} seconde{'s' if round(gap) > 1 else ''}", f"{gap:.0f} second{'s' if round(gap) != 1 else ''}", f"{gap:.0f} saniye")
             if len(group) > 1:
                 where = where.replace("la rattrapes", "les rattrapes").replace("catch it", "catch them")
-                say(None, L_(f"{len(group)} {name} devant, à {sec}{where}.", f"{len(group)} {name} cars ahead, {sec}{where}."))
+                say(None, L_(f"{len(group)} {name} devant, à {sec}{where}.", f"{len(group)} {name} cars ahead, {sec}{where}.", f"Önde {len(group)} {name} var, {sec} ileride{where}."))
             else:
-                say(None, L_(f"{name} plus lente devant, à {sec}{where}.", f"Slower {name} ahead, {sec}{where}."))
+                say(None, L_(f"{name} plus lente devant, à {sec}{where}.", f"Slower {name} ahead, {sec}{where}.", f"Önde daha yavaş bir {name} var, {sec} ileride{where}."))
             return
 
 
@@ -251,7 +252,7 @@ class GapTrend:
         if self.count % every != 1 % every or s.in_pits:
             return
         msg = self._ahead_msg() or self._behind_msg()
-        msg = msg and msg.replace("PNone", L("la voiture", "the car"))
+        msg = msg and msg.replace("PNone", L("la voiture", "the car", "araç"))
         if msg:
             say(None, msg)
 
@@ -267,10 +268,10 @@ class GapTrend:
         if ENCOURAGE == "discret":
             return ""              # juste l'info, sans encouragement
         i = random.randrange(len(fr))
-        out = " " + L(fr[i], en[i])
+        out = " " + L(fr[i], en[i], PEP_TR.get(en[i]))
         if ENCOURAGE == "motivant" and random.random() < 0.5:
             j = random.randrange(len(MORE_PEP_FR))
-            out += " " + L(MORE_PEP_FR[j], MORE_PEP_EN[j])
+            out += " " + L(MORE_PEP_FR[j], MORE_PEP_EN[j], PEP_TR.get(MORE_PEP_EN[j]))
         return out
 
     def _ahead_msg(self):
@@ -279,22 +280,23 @@ class GapTrend:
             return None
         if rate < -0.12:
             if gap < 1.0:
-                return L(f"Tu es dans les roues de P{place}, attaque !", f"You're on P{place}'s gearbox, attack!") + self._pep(
+                return L(f"Tu es dans les roues de P{place}, attaque !", f"You're on P{place}'s gearbox, attack!", f"P{place} hemen önünde, saldır!") + self._pep(
                     ["Mets-lui la pression, montre-toi dans ses rétros.", "Il est à portée, cherche l'ouverture au freinage.",
                      "Il commence à craquer, reste collé et attends sa faute."],
                     ["Put him under pressure, show yourself in his mirrors.", "He's in range, look for a gap under braking.",
                      "He's starting to crack, stay close and wait for his mistake."])
             n = math.ceil((gap - 0.8) / -rate)
             return L(f"Tu reprends {_dix(rate)} par tour sur P{place}, dans ses roues dans {n} tour{'s' if n > 1 else ''}.",
-                     f"You're gaining {_dix(rate)} a lap on P{place}, on his gearbox in {n} lap{'s' if n > 1 else ''}.") + self._pep(
+                     f"You're gaining {_dix(rate)} a lap on P{place}, on his gearbox in {n} lap{'s' if n > 1 else ''}.",
+                     f"P{place} ile farkı tur başına {_dix(rate)} kapatıyorsun, {n} tur sonra dibindesin.") + self._pep(
                     ["Continue comme ça !", "Pousse, il perd du temps !", "Super rythme, va le chercher !",
                      "Il est en difficulté, mets-lui la pression !"],
                     ["Keep it up!", "Push, he's losing time!", "Great pace, go get him!", "He's struggling, put the pressure on!"])
         if rate < -0.05 and gap < 5:
-            return L(f"Tu grappilles sur P{place}, petit à petit.", f"You're chipping away at P{place}, bit by bit.") + self._pep(
+            return L(f"Tu grappilles sur P{place}, petit à petit.", f"You're chipping away at P{place}, bit by bit.", f"P{place} ile farkı yavaş yavaş kapatıyorsun.") + self._pep(
                 ["Continue comme ça.", "Reste régulier, ça va payer."], ["Keep it going.", "Stay consistent, it'll pay off."])
         if rate > 0.15:
-            return L(f"P{place} s'échappe de {_dix(rate)} par tour.", f"P{place} is pulling away by {_dix(rate)} a lap.") + self._pep(
+            return L(f"P{place} s'échappe de {_dix(rate)} par tour.", f"P{place} is pulling away by {_dix(rate)} a lap.", f"P{place} tur başına {_dix(rate)} uzaklaşıyor.") + self._pep(
                 ["Accroche-toi, ne le laisse pas filer.", "Reste concentré, fais ta course.", "Pas de panique, la course est longue."],
                 ["Hang on, don't let him go.", "Stay focused, run your own race.", "No panic, it's a long race."])
         return None
@@ -305,18 +307,19 @@ class GapTrend:
             return None
         if rate < -0.12:
             if gap < 1.0:
-                return L(f"P{place} est dans tes roues, défends !", f"P{place} is right behind you, defend!") + self._pep(
+                return L(f"P{place} est dans tes roues, défends !", f"P{place} is right behind you, defend!", f"P{place} hemen arkanda, savun!") + self._pep(
                     ["Ferme l'intérieur aux freinages.", "Pas d'erreur, soigne tes sorties de virage.", "Ne lui laisse aucune ouverture."],
                     ["Cover the inside into the braking zones.", "No mistakes, nail your corner exits.", "Don't give him any gap."])
             n = math.ceil((gap - 0.8) / -rate)
             return L(f"P{place} revient de {_dix(rate)} par tour, il sera sur toi dans {n} tour{'s' if n > 1 else ''}.",
-                     f"P{place} is closing by {_dix(rate)} a lap, he'll be on you in {n} lap{'s' if n > 1 else ''}.") + self._pep(
+                     f"P{place} is closing by {_dix(rate)} a lap, he'll be on you in {n} lap{'s' if n > 1 else ''}.",
+                     f"P{place} tur başına {_dix(rate)} yaklaşıyor, {n} tur sonra sana yetişir.") + self._pep(
                     ["Il est plus rapide, pousse un peu plus.", "Ne lâche rien, garde ton rythme.",
                      "Reste propre, fais tes trajectoires et il ne passera pas."],
                     ["He's quicker, push a bit harder.", "Don't give up, keep your pace.",
                      "Stay clean, hit your lines and he won't get by."])
         if rate > 0.15:
-            return L(f"Tu creuses l'écart sur P{place}, {_dix(rate)} par tour.", f"You're pulling away from P{place}, {_dix(rate)} a lap.") + self._pep(
+            return L(f"Tu creuses l'écart sur P{place}, {_dix(rate)} par tour.", f"You're pulling away from P{place}, {_dix(rate)} a lap.", f"P{place} ile farkı açıyorsun, tur başına {_dix(rate)}.") + self._pep(
                 ["Super boulot, continue comme ça !", "Tu le décroches, garde ce rythme.", "Parfait, il ne peut pas suivre."],
                 ["Great job, keep it up!", "You're dropping him, keep this pace.", "Perfect, he can't keep up."])
         return None
@@ -326,6 +329,27 @@ MORE_PEP_FR = ["Allez, allez !", "On y croit !", "Tu es en feu aujourd'hui !", "
                "C'est exactement ce qu'il faut faire.", "Bravo, c'est du beau travail."]
 MORE_PEP_EN = ["Come on, come on!", "We believe in it!", "You're on fire today!", "Superb driving!", "Never give up!",
                "That's exactly what we need.", "Proud of you."]
+# Turc : les phrases d'encouragement, rangées par leur version anglaise (absente = anglais).
+PEP_TR = {
+    "Come on, come on!": "Hadi, hadi!", "We believe in it!": "Buna inanıyoruz!", "You're on fire today!": "Bugün alev alevsin!",
+    "Superb driving!": "Harika sürüş!", "Never give up!": "Asla pes etme!",
+    "That's exactly what we need.": "Tam olarak ihtiyacımız olan bu.", "Proud of you.": "Seninle gurur duyuyorum.",
+    "Put him under pressure, show yourself in his mirrors.": "Baskı kur, aynalarında görün.",
+    "He's in range, look for a gap under braking.": "Menzilde, frenajda boşluk kolla.",
+    "He's starting to crack, stay close and wait for his mistake.": "Çözülmeye başladı, yakın kal ve hatasını bekle.",
+    "Keep it up!": "Böyle devam!", "Push, he's losing time!": "Bastır, zaman kaybediyor!",
+    "Great pace, go get him!": "Harika tempo, yakala onu!", "He's struggling, put the pressure on!": "Zorlanıyor, baskıyı artır!",
+    "Keep it going.": "Böyle devam.", "Stay consistent, it'll pay off.": "İstikrarlı kal, karşılığını alacaksın.",
+    "Hang on, don't let him go.": "Dayan, kaçmasına izin verme.", "Stay focused, run your own race.": "Odaklan, kendi yarışını sür.",
+    "No panic, it's a long race.": "Panik yok, yarış uzun.",
+    "Cover the inside into the braking zones.": "Frenajlarda iç çizgiyi kapat.",
+    "No mistakes, nail your corner exits.": "Hata yok, viraj çıkışlarına özen göster.",
+    "Don't give him any gap.": "Ona hiç boşluk bırakma.",
+    "He's quicker, push a bit harder.": "O daha hızlı, biraz daha bastır.", "Don't give up, keep your pace.": "Pes etme, tempoyu koru.",
+    "Stay clean, hit your lines and he won't get by.": "Temiz kal, çizgini koru, geçemez.",
+    "Great job, keep it up!": "Harika iş, böyle devam!", "You're dropping him, keep this pace.": "Onu koparıyorsun, bu tempoyu koru.",
+    "Perfect, he can't keep up.": "Mükemmel, sana ayak uyduramıyor.",
+}
 
 
 # ======================================================================= 11. places gagnées / perdues
@@ -382,37 +406,39 @@ class Places:
         if abs(diff) > 3:
             return                 # gros saut : arrêts des autres, pénalité… pas un vrai dépassement
         if diff > 0:
-            n = L(f"{diff} places de plus" if diff > 1 else "Une place de plus", f"{diff} places gained" if diff > 1 else "One place up")
-            pep = random.choice([L("Bien joué !", "Nice one!"), L("Superbe dépassement !", "Great move!"), L("Continue !", "Keep going!")])
+            n = L(f"{diff} places de plus" if diff > 1 else "Une place de plus", f"{diff} places gained" if diff > 1 else "One place up", f"{diff} sıra kazandın" if diff > 1 else "Bir sıra yükseldin")
+            pep = random.choice([L("Bien joué !", "Nice one!", "Güzel!"), L("Superbe dépassement !", "Great move!", "Harika hamle!"), L("Continue !", "Keep going!", "Devam et!")])
             if ENCOURAGE == "motivant":
-                j = random.randrange(len(MORE_PEP_FR)); pep += " " + L(MORE_PEP_FR[j], MORE_PEP_EN[j])
-            say(None, L(f"{n}, tu es P{pos}. ", f"{n}, you're P{pos}. ") + pep)
+                j = random.randrange(len(MORE_PEP_FR)); pep += " " + L(MORE_PEP_FR[j], MORE_PEP_EN[j], PEP_TR.get(MORE_PEP_EN[j]))
+            say(None, L(f"{n}, tu es P{pos}. ", f"{n}, you're P{pos}. ", f"{n}, P{pos} oldun. ") + pep)
         else:
             k = -diff
-            say(None, L(f"Tu perds {k if k > 1 else 'une'} place{'s' if k > 1 else ''}, P{pos}. ", f"You lose {k} place{'s' if k > 1 else ''}, P{pos}. ")
-                + random.choice([L("Accroche-toi, on va la reprendre.", "Hang on, we'll get it back."),
-                                 L("Pas grave, reste concentré.", "No worries, stay focused."),
-                                 L("Respire, la course est longue.", "Breathe, it's a long race.")]))
+            say(None, L(f"Tu perds {k if k > 1 else 'une'} place{'s' if k > 1 else ''}, P{pos}. ", f"You lose {k} place{'s' if k > 1 else ''}, P{pos}. ", f"{k} sıra kaybettin, P{pos}. ")
+                + random.choice([L("Accroche-toi, on va la reprendre.", "Hang on, we'll get it back.", "Dayan, geri alacağız."),
+                                 L("Pas grave, reste concentré.", "No worries, stay focused.", "Sorun değil, odaklan."),
+                                 L("Respire, la course est longue.", "Breathe, it's a long race.", "Nefes al, yarış uzun.")]))
 
     def _start_msg(self, pos, say) -> None:
         d = self.start - pos
         disc = ENCOURAGE == "discret"
         if d > 0:
             msg = L(f"Bon départ, tu as gagné {d if d > 1 else 'une'} place{'s' if d > 1 else ''}, tu es P{pos}.",
-                    f"Good start, you gained {d} place{'s' if d > 1 else ''}, you're P{pos}.")
+                    f"Good start, you gained {d} place{'s' if d > 1 else ''}, you're P{pos}.",
+                    f"İyi start, {d} sıra kazandın, P{pos} oldun.")
             if not disc:
-                msg += " " + random.choice([L("Superbe !", "Superb!"), L("Continue comme ça !", "Keep it up!"),
-                                            L("Excellent premier tour !", "Excellent first lap!")])
+                msg += " " + random.choice([L("Superbe !", "Superb!", "Muhteşem!"), L("Continue comme ça !", "Keep it up!", "Böyle devam!"),
+                                            L("Excellent premier tour !", "Excellent first lap!", "Mükemmel bir ilk tur!")])
         elif d < 0:
             msg = L(f"Premier tour difficile, tu as perdu {-d if d < -1 else 'une'} place{'s' if d < -1 else ''}, tu es P{pos}.",
-                    f"Tough first lap, you lost {-d} place{'s' if d < -1 else ''}, you're P{pos}.")
+                    f"Tough first lap, you lost {-d} place{'s' if d < -1 else ''}, you're P{pos}.",
+                    f"Zor bir ilk tur, {-d} sıra kaybettin, P{pos} oldun.")
             if not disc:
-                msg += " " + random.choice([L("Pas grave, on va les reprendre.", "No worries, we'll get them back."),
-                                            L("La course est longue, reste calme.", "It's a long race, stay calm.")])
+                msg += " " + random.choice([L("Pas grave, on va les reprendre.", "No worries, we'll get them back.", "Sorun değil, geri alacağız."),
+                                            L("La course est longue, reste calme.", "It's a long race, stay calm.", "Yarış uzun, sakin kal.")])
         else:
-            msg = L(f"Premier tour propre, tu gardes ta place, P{pos}.", f"Clean first lap, you hold your place, P{pos}.")
+            msg = L(f"Premier tour propre, tu gardes ta place, P{pos}.", f"Clean first lap, you hold your place, P{pos}.", f"Temiz bir ilk tur, yerini korudun, P{pos}.")
             if not disc:
-                msg += " " + L("Maintenant, on attaque !", "Now let's attack!")
+                msg += " " + L("Maintenant, on attaque !", "Now let's attack!", "Şimdi saldırı zamanı!")
         say(None, msg)
 
 
@@ -460,27 +486,29 @@ class Morale:
         if prev and last < prev - 0.3:
             d = prev - last
             lines.append(L(f"Super tour, {d:.1f} seconde de mieux que le précédent !".replace(".", ","),
-                           f"Great lap, {d:.1f} seconds quicker than the last one!"))
+                           f"Great lap, {d:.1f} seconds quicker than the last one!",
+                           f"Harika tur, öncekinden {d:.1f} saniye daha hızlı!"))
         elif prev and abs(last - prev) < 0.4:
-            lines.append(L("Belle régularité, continue sur ce rythme.", "Nice and consistent, keep this pace."))
+            lines.append(L("Belle régularité, continue sur ce rythme.", "Nice and consistent, keep this pace.", "Güzel ve istikrarlı, bu tempoyu koru."))
         if self.trouble_lap is not None and s.laps_done - self.trouble_lap <= 6:
             lines.append(random.choice([
-                L("On a eu un coup dur, mais tu remontes. Continue comme ça !", "We had a tough moment, but you're coming back. Keep it up!"),
-                L("Oublie l'incident, regarde devant, tu vas plus vite qu'eux.", "Forget the incident, look ahead, you're quicker than them."),
-                L("Belle réaction après le pépin, je sens que tu vas remonter.", "Great reaction after the trouble, I can feel you climbing back.")]))
+                L("On a eu un coup dur, mais tu remontes. Continue comme ça !", "We had a tough moment, but you're coming back. Keep it up!", "Zor bir an yaşadık ama toparlanıyorsun. Böyle devam!"),
+                L("Oublie l'incident, regarde devant, tu vas plus vite qu'eux.", "Forget the incident, look ahead, you're quicker than them.", "Olayı unut, ileri bak, onlardan daha hızlısın."),
+                L("Belle réaction après le pépin, je sens que tu vas remonter.", "Great reaction after the trouble, I can feel you climbing back.", "Sorundan sonra harika toparladın, yeniden yükseldiğini hissediyorum.")]))
         if pos and pos <= 3:
-            lines.append(L(f"P{pos}, tu es sur le podium, garde la tête froide !", f"P{pos}, you're on the podium, stay cool!"))
+            lines.append(L(f"P{pos}, tu es sur le podium, garde la tête froide !", f"P{pos}, you're on the podium, stay cool!", f"P{pos}, podyumdasın, sakin kal!"))
         if not lines:
-            lines = [L("Tu fais du bon boulot, reste concentré.", "You're doing a good job, stay focused."),
-                     L("Chaque tour compte, on continue à pousser.", "Every lap counts, keep pushing."),
-                     L("La course est longue, tout peut encore arriver.", "It's a long race, anything can still happen."),
+            lines = [L("Tu fais du bon boulot, reste concentré.", "You're doing a good job, stay focused.", "İyi iş çıkarıyorsun, odaklan."),
+                     L("Chaque tour compte, on continue à pousser.", "Every lap counts, keep pushing.", "Her tur önemli, bastırmaya devam."),
+                     L("La course est longue, tout peut encore arriver.", "It's a long race, anything can still happen.", "Yarış uzun, her şey olabilir."),
                      L("Bien, propre et régulier, c'est comme ça qu'on gagne des places.",
-                       "Good, clean and consistent, that's how we gain places.")]
+                       "Good, clean and consistent, that's how we gain places.",
+                       "Güzel, temiz ve istikrarlı; sıralar böyle kazanılır.")]
         fresh = [l for l in lines if l != getattr(self, "last_msg", None)] or lines
         msg = random.choice(fresh)
         self.last_msg = msg
         if ENCOURAGE == "motivant" and random.random() < 0.4:
-            j = random.randrange(len(MORE_PEP_FR)); msg += " " + L(MORE_PEP_FR[j], MORE_PEP_EN[j])
+            j = random.randrange(len(MORE_PEP_FR)); msg += " " + L(MORE_PEP_FR[j], MORE_PEP_EN[j], PEP_TR.get(MORE_PEP_EN[j]))
         say(None, msg)
 
 
@@ -500,19 +528,21 @@ class TrackLimits:
             self.steps = s.tl_steps
             me = next((c for c in s.cars if c.get("me")), None)
             c = self.beh.corner_at(me["f"], ahead=0.01) if me and self.beh else None
-            where = L(f" au virage {c}", f" at turn {c}") if c else ""
+            where = L(f" au virage {c}", f" at turn {c}", f" {c}. virajda") if c else ""
             if s.tl_per_penalty:
                 left = s.tl_per_penalty - s.tl_steps
                 if left > 3:
                     say(None, L(f"Limites de piste{where}, avertissement {s.tl_steps} sur {s.tl_per_penalty}.",
-                                f"Track limits{where}, warning {s.tl_steps} of {s.tl_per_penalty}."))
+                                f"Track limits{where}, warning {s.tl_steps} of {s.tl_per_penalty}.",
+                                f"Pist sınırı ihlali{where}, {s.tl_per_penalty} haktan {s.tl_steps}. uyarı."))
                     return
-                tail = L("la prochaine, c'est la pénalité !", "next one is a penalty!") if left <= 1 else \
-                    L(f"encore {left} avant la pénalité.", f"{left} more before a penalty.")
+                tail = L("la prochaine, c'est la pénalité !", "next one is a penalty!", "bir sonraki ceza!") if left <= 1 else \
+                    L(f"encore {left} avant la pénalité.", f"{left} more before a penalty.", f"cezaya {left} uyarı kaldı.")
                 say(None, L(f"Limites de piste{where}, avertissement {s.tl_steps} sur {s.tl_per_penalty}, {tail}",
-                            f"Track limits{where}, warning {s.tl_steps} of {s.tl_per_penalty}, {tail}"), urgent=left <= 1)
+                            f"Track limits{where}, warning {s.tl_steps} of {s.tl_per_penalty}, {tail}",
+                            f"Pist sınırı ihlali{where}, {s.tl_per_penalty} haktan {s.tl_steps}. uyarı, {tail}"), urgent=left <= 1)
             else:
-                say(None, L(f"Limites de piste{where}, avertissement numéro {s.tl_steps}.", f"Track limits{where}, warning number {s.tl_steps}."))
+                say(None, L(f"Limites de piste{where}, avertissement numéro {s.tl_steps}.", f"Track limits{where}, warning number {s.tl_steps}.", f"Pist sınırı ihlali{where}, {s.tl_steps}. uyarı."))
 
 
 # ======================================================================= 9. pneus et freins froids
@@ -575,20 +605,24 @@ class WarmUp:
             self.warned = True
             if tc and bc:
                 say(None, L("Attention, pneus froids et freins froids. Doucement au premier freinage.",
-                                "Careful, cold tyres and cold brakes. Easy on the first braking zone."))
+                                "Careful, cold tyres and cold brakes. Easy on the first braking zone.",
+                                "Dikkat, lastikler ve frenler soğuk. İlk frenajda yavaş."))
             elif tc:
                 say(None, L("Attention, pneus froids. Fais-les monter en température avant d'attaquer.",
-                                "Careful, cold tyres. Bring them up to temperature before you push."))
+                                "Careful, cold tyres. Bring them up to temperature before you push.",
+                                "Dikkat, lastikler soğuk. Bastırmadan önce ısıt."))
             elif bc:
                 say(None, L("Attention, freins froids. Freine plus tôt les premiers virages.",
-                                "Careful, cold brakes. Brake earlier for the first few corners."))
+                                "Careful, cold brakes. Brake earlier for the first few corners.",
+                                "Dikkat, frenler soğuk. İlk birkaç virajda erken frenle."))
             else:
                 self.watch = None    # déjà chaud : rien à dire
             return
         if not tc and not bc:
             self.watch = None
             say(None, L("Pneus et freins en température. Vas-y, tu peux attaquer !",
-                            "Tyres and brakes are up to temperature. Go on, you can push now!"))
+                            "Tyres and brakes are up to temperature. Go on, you can push now!",
+                            "Lastikler ve frenler ısındı. Hadi, artık bastırabilirsin!"))
 
 
 # ======================================================================= 10. voiture en piste
@@ -597,19 +631,21 @@ def car_label(car_class: str, car: str = "") -> str:
     from setups import series_tag
     name = class_name(car_class)
     t = series_tag(car_class, car)
-    return L(f"{name}, version {t}", f"{name}, {t} version") if t else name
+    return L(f"{name}, version {t}", f"{name}, {t} version", f"{name}, {t} versiyonu") if t else name
 
 
 def car_sentence(car_class: str, car: str = "") -> str:
     if not car_class:
         return L("Je ne vois pas encore ta voiture. Va au garage ou monte dans la voiture.",
-                 "I can't see your car yet. Go to the garage or get in the car.")
+                 "I can't see your car yet. Go to the garage or get in the car.",
+                 "Aracını henüz göremiyorum. Garaja git veya araca bin.")
     from setups import series_tag
-    out = L(f"Tu es en {car_label(car_class, car)}.", f"You're in the {car_label(car_class, car)}.")
+    out = L(f"Tu es en {car_label(car_class, car)}.", f"You're in the {car_label(car_class, car)}.", f"Aracın: {car_label(car_class, car)}.")
     t = series_tag(car_class, car)
     if t:
         out += L(f" Charge bien un setup fait pour la {class_name(car_class)} {t}.",
-                 f" Make sure you load a setup made for the {t} {class_name(car_class)}.")
+                 f" Make sure you load a setup made for the {t} {class_name(car_class)}.",
+                 f" {t} {class_name(car_class)} için hazırlanmış bir setup yüklediğinden emin ol.")
     return out
 
 
@@ -666,9 +702,9 @@ class Damage:
         # carrosserie
         if sum(s.dents) > sum(self.dents):
             worst = max(s.dents)
-            say(None, L("Contact ! ", "Contact! ")
-                + (L("Gros dégâts à la carrosserie.", "Heavy body damage.") if worst >= 2 else L("Dégâts légers à la carrosserie.", "Light body damage."))
-                + L(" Je regarde l'aéro et les suspensions.", " Checking aero and suspension."), urgent=True)
+            say(None, L("Contact ! ", "Contact! ", "Temas! ")
+                + (L("Gros dégâts à la carrosserie.", "Heavy body damage.", "Kaportada ağır hasar.") if worst >= 2 else L("Dégâts légers à la carrosserie.", "Light body damage.", "Kaportada hafif hasar."))
+                + L(" Je regarde l'aéro et les suspensions.", " Checking aero and suspension.", " Aero ve süspansiyonu kontrol ediyorum."), urgent=True)
             if worst >= 2:
                 self.repair = True
             self._last_fetch = 0   # on relit l'interface de LMU tout de suite
@@ -676,14 +712,14 @@ class Damage:
         # crevaisons, roues
         for i in range(4):
             if s.flat[i] and not self.flat[i]:
-                say(None, L(f"Crevaison {WHEEL_NAME(i)} ! Rentre au stand, doucement.", f"Puncture {WHEEL_NAME(i)}! Box, take it easy."), urgent=True)
+                say(None, L(f"Crevaison {WHEEL_NAME(i)} ! Rentre au stand, doucement.", f"Puncture {WHEEL_NAME(i)}! Box, take it easy.", f"{WHEEL_NAME(i).capitalize()} lastik patladı! Pite gir, yavaş."), urgent=True)
                 self.repair = self.all = True
             if s.wheel_off[i] and not self.wheel_off[i]:
-                say(None, L(f"Roue {WHEEL_NAME(i)} perdue ! Rentre au stand.", f"Lost the {WHEEL_NAME(i)} wheel! Box now."), urgent=True)
+                say(None, L(f"Roue {WHEEL_NAME(i)} perdue ! Rentre au stand.", f"Lost the {WHEEL_NAME(i)} wheel! Box now.", f"{WHEEL_NAME(i).capitalize()} tekerlek koptu! Hemen pite gir."), urgent=True)
                 self.repair = self.all = True
         self.flat, self.wheel_off = list(s.flat), list(s.wheel_off)
         if s.part_off and not self.part_off:
-            say(None, L("Une pièce s'est détachée de la voiture.", "A part has come off the car."), urgent=True)
+            say(None, L("Une pièce s'est détachée de la voiture.", "A part has come off the car.", "Araçtan bir parça koptu."), urgent=True)
         self.part_off = s.part_off
         if s.in_pits and s.pit_state == 3:
             self.repair, self.choice, self.all = False, None, False   # arrêté au stand : on considère que c'est réglé
@@ -722,15 +758,16 @@ class Damage:
             if old is None:
                 return
             if aero is not None and (old.get("aero") or 0) + 0.05 < aero:
-                say(None, L(f"Aéro endommagé à {aero * 100:.0f} %.", f"Aero damaged {aero * 100:.0f} %.")
-                    + (L(" On répare au prochain arrêt.", " We'll fix it at the next stop.") if aero > 0.15 else ""))
+                say(None, L(f"Aéro endommagé à {aero * 100:.0f} %.", f"Aero damaged {aero * 100:.0f} %.", f"Aero hasarı %{aero * 100:.0f}.")
+                    + (L(" On répare au prochain arrêt.", " We'll fix it at the next stop.", " Bir sonraki pit stopta onarırız.") if aero > 0.15 else ""))
                 if aero > 0.15:
                     self.repair = True
             for i, v in enumerate(susp[:4]):
                 o = (old.get("susp") or [0, 0, 0, 0])[i] if old.get("susp") else 0
                 if isinstance(v, (int, float)) and v > (o or 0) + 0.05:
                     say(None, L(f"Suspension {WHEEL_NAME(i)} touchée à {v * 100:.0f} %. Attention au comportement.",
-                                f"{WHEEL_NAME(i).capitalize()} suspension damaged {v * 100:.0f} %. Watch the handling."))
+                                f"{WHEEL_NAME(i).capitalize()} suspension damaged {v * 100:.0f} %. Watch the handling.",
+                                f"{WHEEL_NAME(i).capitalize()} süspansiyon hasarı %{v * 100:.0f}. Aracın davranışına dikkat."))
                     if v > 0.15:
                         self.repair = self.all = True
         except Exception:
@@ -827,10 +864,11 @@ class Weather:
             if not raining and n["rain"] >= 0.5:
                 self.said.add(key)
                 say(None, L(f"Météo : pluie probable dans environ {mins:.0f} minutes, {n['rain'] * 100:.0f} % de risque.",
-                            f"Weather: rain likely in about {mins:.0f} minutes, {n['rain'] * 100:.0f} % chance."))
+                            f"Weather: rain likely in about {mins:.0f} minutes, {n['rain'] * 100:.0f} % chance.",
+                            f"Hava durumu: yaklaşık {mins:.0f} dakika sonra yağmur bekleniyor, olasılık %{n['rain'] * 100:.0f}."))
             elif raining and n["rain"] < 0.2 and n["sky"] <= 3:
                 self.said.add(key)
-                say(None, L(f"Météo : éclaircie prévue dans environ {mins:.0f} minutes.", f"Weather: drying up in about {mins:.0f} minutes."))
+                say(None, L(f"Météo : éclaircie prévue dans environ {mins:.0f} minutes.", f"Weather: drying up in about {mins:.0f} minutes.", f"Hava durumu: yaklaşık {mins:.0f} dakika sonra yağmur diniyor."))
 
     def ui(self, s) -> list:
         if not self.forecast or s.time_left is None:
@@ -840,5 +878,5 @@ class Weather:
         for n in self.forecast:
             mins = (n["at"] * total - s.elapsed) / 60
             if mins >= -1:
-                out.append({"mins": round(mins), "rain": round(n["rain"] * 100), "sky": L("|".join(SKY_FR), "|".join(SKY_EN)).split("|")[max(0, min(10, n["sky"]))]})
+                out.append({"mins": round(mins), "rain": round(n["rain"] * 100), "sky": L("|".join(SKY_FR), "|".join(SKY_EN), "açık|az bulutlu|bulutlu|kapalı|çok kapalı|çisenti|hafif yağmur|yağmur|şiddetli yağmur|fırtına|sağanak").split("|")[max(0, min(10, n["sky"]))]})
         return out[:4]

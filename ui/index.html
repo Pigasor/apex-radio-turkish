@@ -206,12 +206,12 @@
       <span class="pill" id="status"><span class="dot"></span><span id="statustxt">En attente du jeu…</span></span>
       <button id="lmulaunch" class="act" hidden title="Démarre Le Mans Ultimate par Steam" data-en-title="Starts Le Mans Ultimate through Steam">▶ <span data-en="Launch LMU">Lancer LMU</span></button>
       <div class="racebtns" role="group" aria-label="En course">
-        <button id="vtoggle" class="tog" title="Radio : l'ingénieur parle ou se tait" data-en-title="Radio: the engineer talks or stays silent">🔊 Radio</button>
+        <button id="vtoggle" class="tog" title="Radio : l'ingénieur parle ou se tait" data-en-title="Radio: the engineer talks or stays silent">🔊 <span data-en="Radio">Radio</span></button>
         <button id="quiet" class="tog" title="Mode silence : l'ingénieur ne dit plus que l'urgent (box, neutralisation, spotter, réponses). Tu peux aussi dire « silence » ou « reparle » à la radio." data-en-title="Quiet mode: urgent calls only (box, yellow flag, spotter, answers). You can also say &quot;be quiet&quot; or &quot;talk again&quot; on the radio.">🤫 <span data-en="Quiet">Silence</span></button>
         <button id="spot" class="tog" title="Spotter gauche / droite" data-en-title="Left / right spotter">👀 Spotter</button>
       </div>
       <button id="wsopen" class="act" style="border-radius:999px" data-en="SETUP WORKSHOP">ATELIER SETUP</button>
-      <a id="records" class="pill" href="/records" style="color:#FFE500;text-decoration:none">RECORDS</a>
+      <a id="records" class="pill" href="/records" style="color:#FFE500;text-decoration:none" data-en="RECORDS">RECORDS</a>
       <a id="debriefs" class="pill" href="/debriefs" style="color:var(--text);text-decoration:none" data-en="DEBRIEFS">DÉBRIEFS</a>
       <button id="setopen" title="Réglages" data-en-title="Settings" aria-label="Réglages">⚙️</button>
       <a id="phone" class="pill" href="/tel" target="_blank" style="color:var(--text);text-decoration:none" title="Affichage téléphone" data-en-title="Phone view">📱</a>
@@ -236,7 +236,7 @@
       </section>
 
       <section class="card radio">
-        <div class="row" style="align-items:center"><h2 style="margin:0">Radio</h2><span id="pttbtn" style="color:var(--accent);font-size:13px">–</span></div>
+        <div class="row" style="align-items:center"><h2 style="margin:0" data-en="Radio">Radio</h2><span id="pttbtn" style="color:var(--accent);font-size:13px">–</span></div>
         <div id="radio"></div>
         <div class="ptt">
           <div class="row" style="align-items:center"><span id="pttstate">–</span><span id="heard" class="muted" style="font-family:Inter,sans-serif;font-size:13px;max-width:60%"></span></div>
@@ -252,7 +252,7 @@
       <div id="dash" style="display:none;flex-direction:column;gap:16px;flex-grow:1">
         <div class="tiles">
           <section class="card">
-            <h2>Position</h2>
+            <h2 data-en="Position">Position</h2>
             <div class="big glow" id="pos">P–</div>
             <div id="lapbig">–</div>
             <div class="sub" id="lapleft">–</div>
@@ -277,7 +277,7 @@
             <div class="sub" id="pitstatus" style="margin-top:4px"></div>
             <div class="pitrow" style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;align-items:center">
               <span class="sub" style="margin:0" data-en="Pit:">Stand :</span>
-              <button class="pitm" data-m="auto">AUTO</button><button class="pitm" data-m="demande" data-en="ON REQUEST">À LA DEMANDE</button><button class="pitm" data-m="off">OFF</button>
+              <button class="pitm" data-m="auto" data-en="AUTO">AUTO</button><button class="pitm" data-m="demande" data-en="ON REQUEST">À LA DEMANDE</button><button class="pitm" data-m="off" data-en="OFF">OFF</button>
               <button id="pitnow" title="Régler le menu des stands maintenant" data-en-title="Set the pit menu now" data-en="SET">RÉGLER</button>
             </div>
           </section>
@@ -286,7 +286,7 @@
         <div class="mid">
           <div class="leftcol">
             <section class="card">
-              <h2><span data-en="Tyres">Pneus</span> <span id="compound"></span></h2>
+              <h2><span data-en="Tyres">Pneus</span> <span id="compound" lang="en"></span></h2>
               <div class="tyres" id="tyres"></div>
               <div class="row" style="margin-top:10px"><span data-en="Before critical wear">Avant usure critique</span><span id="tyrelaps">–</span></div>
             </section>
@@ -299,7 +299,7 @@
             </section>
           </div>
           <section class="card mapcard">
-            <div class="row" style="align-items:baseline;flex-wrap:wrap"><h2 style="margin:0"><span data-en="Track">Circuit</span> <span id="trackname"></span></h2><span class="sub" style="margin:0" id="maplegend"></span></div>
+            <div class="row" style="align-items:baseline;flex-wrap:wrap"><h2 style="margin:0"><span data-en="Track">Circuit</span> <span id="trackname" lang="en"></span></h2><span class="sub" style="margin:0" id="maplegend"></span></div>
             <svg id="map" role="img" aria-label="Carte du circuit avec les voitures en direct" data-en-aria="Live track map with all cars" preserveAspectRatio="xMidYMid meet"></svg>
             <div class="sub" id="mapnote"></div>
             <div id="behav"></div>
@@ -307,7 +307,7 @@
         </div>
 
         <section class="card chrono">
-          <div class="row" style="align-items:baseline;flex-wrap:wrap"><h2 style="margin:0" data-en="Lap times · sectors">Chronos · secteurs</h2><span class="sub" style="margin:0"><span data-en="Last / best">Dernier / meilleur</span> <span id="laps">–</span> · Record <span id="rec" style="color:var(--accent)">–</span> · <span data-en="ideal">idéal</span> <span id="ideal">–</span></span></div>
+          <div class="row" style="align-items:baseline;flex-wrap:wrap"><h2 style="margin:0" data-en="Lap times · sectors">Chronos · secteurs</h2><span class="sub" style="margin:0"><span data-en="Last / best">Dernier / meilleur</span> <span id="laps">–</span> · <span data-en="Record">Record</span> <span id="rec" style="color:var(--accent)">–</span> · <span data-en="ideal">idéal</span> <span id="ideal">–</span></span></div>
           <div class="scroll" style="margin-top:8px">
             <table>
               <thead><tr><th></th><th>S1</th><th>S2</th><th>S3</th><th data-en="LAP">TOUR</th></tr></thead>
@@ -400,9 +400,9 @@ const fmtTime = s => { if (s == null) return "–"; s = Math.max(0, s); const m 
 // couleur des messages de Jessica : alerte, stratégie, encouragement ou info
 function kind(t) {
   t = (t || "").toLowerCase();
-  if (/contact|crevaison|arrêtée|drapeau jaune|danger|dégâts|pénalité|puncture|stopped|damage|penalty|attention|careful|safety|neutralis/.test(t)) return "alert";
-  if (/box|stand|essence|carburant|énergie|pneus? (froids|neufs)|réparer|pit|fuel|energy|tyres?/.test(t)) return "strat";
-  if (/bien joué|bravo|super|superbe|record|bon départ|une place de plus|tu peux attaquer|allez|on lâche rien|régularité|en feu|fier|nice|great|good start|keep|push|proud|on fire/.test(t)) return "pep";
+  if (/contact|crevaison|arrêtée|drapeau jaune|danger|dégâts|pénalité|puncture|stopped|damage|penalty|attention|careful|safety|neutralis|temas|patladı|koptu|duran araç|pist dışı|sarı bayrak|hasar|ceza|dikkat/.test(t)) return "alert";
+  if (/box|stand|essence|carburant|énergie|pneus? (froids|neufs)|réparer|pit|fuel|energy|tyres?|yakıt|enerji|lastik|onarım/.test(t)) return "strat";
+  if (/bien joué|bravo|super|superbe|record|bon départ|une place de plus|tu peux attaquer|allez|on lâche rien|régularité|en feu|fier|nice|great|good start|keep|push|proud|on fire|harika|güzel|muhteşem|mükemmel|rekor|iyi start|böyle devam|bastır|gurur|alev|hadi/.test(t)) return "pep";
   return "info";
 }
 const lapHist = { key: null, list: [], n: null };
@@ -413,7 +413,85 @@ const sign = v => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(2);
 const WHEELS = ["AVG", "AVD", "ARG", "ARD"];
 let lastRadio = "", setupPrompt = null;
 let LANG = "fr";
-const T = (fr, en) => LANG === "en" ? en : fr;
+// Turc : textes fixes, rangés par leur version anglaise (un texte absent reste en anglais).
+const TR = {
+  "1 · The setup you're using": "1 · Kullandığın setup", "2 · Suggested changes": "2 · Önerilen değişiklikler",
+  "3 · History on this track": "3 · Bu pistteki geçmiş",
+  "A problem since the last update? Download the previous version and install it over this one: your settings, records and setups are kept.":
+    "Son güncellemeden beri sorun mu var? Önceki sürümü indir ve bunun üzerine kur: ayarların, rekorların ve setup'ların korunur.",
+  "APPLY TO THE APEX FILE": "APEX DOSYASINA UYGULA", "Air / track": "Hava / pist", "All versions": "Tüm sürümler",
+  "Before critical wear": "Kritik aşınmaya kalan", "CHOOSE THE RADIO BUTTON": "TELSİZ TUŞUNU SEÇ", "Call": "Talimat",
+  "Close Apex Radio": "Apex Radio'yu kapat", "Colour": "Renk", "DEBRIEFS": "ÖZETLER", "Encouragement": "Motivasyon",
+  "Engineer": "Mühendis", "Engineer's voice": "Mühendisin sesi", "Fuel": "Yakıt", "Game": "Oyun", "Gaps": "Farklar",
+  "Getting started": "İlk adımlar", "Hide": "Gizle", "Installed Apex Radio version": "Kurulu Apex Radio sürümü",
+  "Installed version": "Kurulu sürüm", "LAP": "TUR",
+  "LMU is installed elsewhere? Pick the game folder (Le Mans Ultimate), Apex finds the setups inside.":
+    "LMU başka bir yere mi kurulu? Oyun klasörünü (Le Mans Ultimate) seç, Apex setup'ları içinde bulur.",
+  "Language": "Dil", "Lap": "Tur", "Lap times · sectors": "Tur zamanları · sektörler", "Last / best": "Son / en iyi",
+  "Launch LMU": "LMU'yu başlat", "Launch Le Mans Ultimate when Apex opens": "Apex açılınca Le Mans Ultimate'ı başlat",
+  "Left / right spotter": "Sol / sağ spotter", "Live track map with all cars": "Tüm araçlarla canlı pist haritası",
+  "Look": "Görünüm", "Mic": "Mikrofon", "ON REQUEST": "İSTEK ÜZERİNE", "Phone view": "Telefon görünümü",
+  "Pit stop": "Pit stop", "Pit:": "Pit:", "QUALI": "SIRALAMA", "Quiet": "Sessiz",
+  "Quiet mode: urgent calls only (box, yellow flag, spotter, answers). You can also say \"be quiet\" or \"talk again\" on the radio.":
+    "Sessiz mod: yalnızca acil çağrılar (box, sarı bayrak, spotter, yanıtlar). Telsizden \"sessiz ol\" veya \"tekrar konuş\" da diyebilirsin.",
+  "RACE": "YARIŞ", "Radio & wheel": "Telsiz ve direksiyon", "Radio button": "Telsiz tuşu",
+  "Radio: the engineer talks or stays silent": "Telsiz: mühendis konuşur veya susar", "SET": "AYARLA", "SETTINGS": "AYARLAR",
+  "SETUP WORKSHOP": "SETUP ATÖLYESİ", "Set the pit menu now": "Pit menüsünü şimdi ayarla", "Settings": "Ayarlar",
+  "Shortcuts (wheel / keyboard)": "Kısayollar (direksiyon / klavye)",
+  "Start Le Mans Ultimate and get in your car: the dashboard will show up by itself.":
+    "Le Mans Ultimate'ı başlat ve aracına bin: gösterge paneli kendiliğinden açılır.",
+  "Starts Le Mans Ultimate through Steam": "Le Mans Ultimate'ı Steam üzerinden başlatır",
+  "THIS IS THE SETUP LOADED IN THE GAME": "OYUNDA YÜKLÜ OLAN SETUP BU", "Test": "Test", "Test the voice": "Sesi test et",
+  "Track": "Pist", "Track wetness": "Pist ıslaklığı", "Type a question…": "Bir soru yaz…", "Tyres": "Lastikler",
+  "Version": "Sürüm", "Voice": "Ses", "Voice test": "Ses testi", "Volume": "Ses düzeyi", "Weather": "Hava durumu",
+  "Working file": "Çalışılan dosya", "ideal": "ideal", "▶ LAUNCH LE MANS ULTIMATE": "▶ LE MANS ULTIMATE'I BAŞLAT",
+  "📁 Choose the LMU folder": "📁 LMU klasörünü seç",
+  " (default)": " (varsayılan)", " (invalid)": " (geçersiz)", "4 tyres": "4 lastik",
+  "<br>No version created by Apex Radio on this track yet.": "<br>Apex Radio bu pistte henüz bir sürüm oluşturmadı.",
+  "After 2 clean laps": "2 temiz turdan sonra", "After the first full lap…": "İlk tam turdan sonra…",
+  "All good, keep going.": "Her şey yolunda, devam.",
+  "Apex Radio is closed. You can close this tab.": "Apex Radio kapandı. Bu sekmeyi kapatabilirsin.",
+  "App stopped": "Uygulama durdu", "Best lap": "En iyi tur", "CALC…": "HESAP…", "CHEQUERED": "DAMALI BAYRAK",
+  "Car balanced, nothing recurring.": "Araç dengeli, tekrarlayan bir sorun yok.", "Close?": "Kapat?",
+  "Current setup: default setup (not saved yet)": "Geçerli setup: fabrika setup'ı (henüz kaydedilmedi)", "Current": "Mevcut",
+  "DEMO": "DEMO", "DOWNLOAD": "İNDİR", "Dry": "Kuru", "ENGINEER": "MÜHENDİS", "Energy": "Enerji", "FUEL": "YAKIT",
+  "FULL COURSE YELLOW": "SARI BAYRAK",
+  "First choose the setup loaded in the game (step 1).": "Önce oyunda yüklü olan setup'ı seç (1. adım).",
+  "Game detected": "Oyun algılandı", "Game detected, get in your car.": "Oyun algılandı, aracına bin.",
+  "Hold your radio button and say \"can you hear me?\"": "Telsiz tuşuna basılı tut ve \"beni duyuyor musun?\" de",
+  "I'll set the pit menu when you box.": "Pite girerken pit menüsünü ben ayarlarım.",
+  "Ideal lap: your best sectors put together": "İdeal tur: en iyi sektörlerinin toplamı", "LISTENING…": "DİNLİYORUM…",
+  "LMU connected": "LMU bağlı", "Last lap": "Son tur", "Last laps": "Son turlar", "My pace": "Tempom",
+  "No folder chosen.": "Klasör seçilmedi.", "No setup chosen for this track.": "Bu pist için setup seçilmedi.",
+  "No stop needed": "Pit stop gerekmiyor",
+  "No track detected yet (start the game, or choose the folder).": "Henüz pist algılanmadı (oyunu başlat veya klasörü seç).",
+  "Nothing to change for now: the car is balanced.": "Şimdilik değiştirilecek bir şey yok: araç dengeli.",
+  "Number of laps": "Tur sayısı", "ON TRACK": "PİSTTE", "PENALTY TO SERVE": "ÇEKİLECEK CEZA",
+  "Pick your radio button (wheel or keyboard)": "Telsiz tuşunu seç (direksiyon veya klavye)", "Pit this lap.": "Bu tur pite gir.",
+  "Potential": "Potansiyel", "Race length in minutes": "Dakika olarak yarış süresi", "Race length": "Yarış süresi",
+  "Race over.": "Yarış bitti.", "Remove": "Kaldır", "Restore this version": "Bu sürüme dön", "SET ON TRACK": "PİSTTE AYARLANDI",
+  "Searching…": "Aranıyor…", "Set up": "Ayarla", "Set": "Seç", "Setting": "Ayar",
+  "Speech recognition loading…": "Ses tanıma yükleniyor…",
+  "Start Le Mans Ultimate and get in your car.": "Le Mans Ultimate'ı başlat ve aracına bin.",
+  "Start Le Mans Ultimate": "Le Mans Ultimate'ı başlat", "Strategy in races only": "Strateji yalnızca yarışta",
+  "Suggested": "Önerilen", "T": "V", "THINKING…": "DÜŞÜNÜYORUM…", "THIS LAP": "BU TUR", "TO THE END": "SONA KADAR",
+  "TYRES": "LASTİKLER", "Test the engineer's voice": "Mühendisin sesini test et",
+  "Tick the changes to apply:": "Uygulanacak değişiklikleri işaretle:", "WAITING": "BEKLEMEDE",
+  "Waiting for the game": "Oyun bekleniyor", "Windows default mic": "Windows varsayılan mikrofonu", "YOU": "SEN",
+  "Yellow flag, slow down.": "Sarı bayrak, yavaşla.", "ahead / behind": "öndeki / arkadaki", "ahead": "önde",
+  "at the start": "başlangıçta", "behind": "arkada", "best lap": "en iyi tur", "best": "en iyi",
+  "calculating…": "hesaplanıyor…", "consumption not measured yet": "tüketim henüz ölçülmedi", "en.": "en.",
+  "fastest": "en hızlı", "female": "kadın", "from": "kaynak:", "in the APEX file": "APEX dosyasında",
+  "keep tyres": "lastikler kalıyor", "lap": "tur", "laps": "tur", "male": "erkek",
+  "no record here yet": "burada henüz rekor yok", "none": "yok", "or": "veya", "press the button…": "tuşa bas…",
+  "starting setup": "başlangıç setup'ı", "wets": "yağmur lastiği", "you": "sen", "⏳ Launching…": "⏳ Başlatılıyor…",
+  "▶ Launch": "▶ Başlat",
+  "Radio": "Telsiz", "RECORDS": "REKORLAR", "Position": "Pozisyon", "AUTO": "OTO", "OFF": "KAPALI", "Record": "Rekor", "record": "rekor",
+  "Blue": "Mavi", "Orange": "Turuncu", "Green": "Yeşil", "Red": "Kırmızı", "Purple": "Mor", "Yellow": "Sarı", "White": "Beyaz",
+  "Low-key": "Sakin", "Normal": "Normal", "Hype": "Coşkulu",
+  "Spotter on / off": "Spotter aç / kapat", "Radio on / off": "Telsiz aç / kapat", "Quiet mode": "Sessiz mod",
+};
+const T = (fr, en, tr) => LANG === "fr" ? fr : LANG === "tr" ? (tr ?? TR[en] ?? en) : en;
 // la LMP2 existe en deux versions dans LMU : LMP2 (WEC) et LMP2_ELMS
 function carLabel(cls, car) {
   const c = (cls || "").toUpperCase(), elms = c.includes("ELMS") || (car || "").toUpperCase().includes(":ELMS");
@@ -422,16 +500,19 @@ function carLabel(cls, car) {
 }
 function applyLang() {
   document.documentElement.lang = LANG;
-  document.querySelectorAll("[data-en]").forEach(el => { if (el.dataset.fr === undefined) el.dataset.fr = el.innerHTML; el.innerHTML = LANG === "en" ? el.dataset.en : el.dataset.fr; });
+  document.querySelectorAll("[data-en]").forEach(el => { if (el.dataset.fr === undefined) el.dataset.fr = el.innerHTML; el.innerHTML = T(el.dataset.fr, el.dataset.en); });
   [["enTitle", "title"], ["enPlaceholder", "placeholder"], ["enAria", "aria-label"]].forEach(([k, attr]) =>
     document.querySelectorAll(`[data-${k.replace(/[A-Z]/g, c => "-" + c.toLowerCase())}]`).forEach(el => {
       const keep = "fr" + k; if (el.dataset[keep] === undefined) el.dataset[keep] = el.getAttribute(attr) || "";
-      el.setAttribute(attr, LANG === "en" ? el.dataset[k] : el.dataset[keep]);
+      el.setAttribute(attr, T(el.dataset[keep], el.dataset[k]));
     }));
-  $("lang").textContent = LANG === "en" ? "EN" : "FR";
+  $("lang").textContent = LANG.toUpperCase();
   lastRadio = ""; loadMics();
 }
 const WHEELS_EN = ["FL", "FR", "RL", "RR"];
+const WHEELS_TR = ["ÖN SOL", "ÖN SAĞ", "ARKA SOL", "ARKA SAĞ"];
+const SESSION_TR = { course: "yarış", qualif: "sıralama", essais: "antrenman", warmup: "ısınma" };
+const KIND_TR = { "sous-virage": "ÖNDEN KAYMA", "survirage": "ARKADAN KAYMA", "blocage": "KİLİTLENME", "patinage": "PATİNAJ", "surbraquage": "AŞIRI DİREKSİYON" };
 const SESSION_EN = { course: "race", qualif: "qualifying", essais: "practice", warmup: "warm-up" };
 const KIND_EN = { "sous-virage": "UNDERSTEER", "survirage": "OVERSTEER", "blocage": "LOCK-UP", "patinage": "WHEELSPIN", "surbraquage": "OVERDRIVING" };
 
@@ -440,7 +521,7 @@ function callout(s, p, radio) {
   if (!s.on_track) return [T("EN ATTENTE", "WAITING"), s.connected ? T("Jeu détecté, monte dans ta voiture.", "Game detected, get in your car.") : T("Lance Le Mans Ultimate et monte dans ta voiture.", "Start Le Mans Ultimate and get in your car."), false];
   if (s.yellow) return [T("NEUTRALISATION", "FULL COURSE YELLOW"), T("Drapeau jaune, ralentis.", "Yellow flag, slow down."), true];
   if (p.ready && p.stops_needed > 0 && p.laps_until_box <= 1) return ["BOX BOX", last && last.urgent ? last.text : T("Rentre ce tour.", "Pit this lap."), true];
-  if (p.ready && p.stops_needed > 0 && p.laps_until_box <= 3) return [T(`BOX DANS ${p.laps_until_box}`, `BOX IN ${p.laps_until_box}`), T(`Arrêt à la fin du tour ${p.box_lap}.`, `Stop at the end of lap ${p.box_lap}.`), false];
+  if (p.ready && p.stops_needed > 0 && p.laps_until_box <= 3) return [T(`BOX DANS ${p.laps_until_box}`, `BOX IN ${p.laps_until_box}`, `${p.laps_until_box} TUR SONRA BOX`), T(`Arrêt à la fin du tour ${p.box_lap}.`, `Stop at the end of lap ${p.box_lap}.`, `${p.box_lap}. turun sonunda pit stop.`), false];
   if (s.game_phase === 8) return [T("DAMIER", "CHEQUERED"), T("Course terminée.", "Race over."), false];
   return [T("EN PISTE", "ON TRACK"), last ? last.text : T("RAS, on roule.", "All good, keep going."), false];
 }
@@ -455,7 +536,7 @@ function render(d) {
   if (!s.connected && Date.now() - lmuClicked > 60000) $("lmulaunch").innerHTML = `▶ ${T("Lancer LMU", "Launch LMU")}`;
   if (document.activeElement !== $("autolmu")) $("autolmu").checked = !!d.autolaunch_lmu;
   $("statustxt").textContent = s.on_track ? T("LMU connecté", "LMU connected") : (s.connected ? T("Jeu détecté", "Game detected") : T("En attente du jeu", "Waiting for the game"));
-  $("session").textContent = s.on_track ? `${s.track} · ${carLabel(s.car_class, s.car)} · ${T(s.session, SESSION_EN[s.session] || s.session)}` : "";
+  $("session").textContent = s.on_track ? `${s.track} · ${carLabel(s.car_class, s.car)} · ${T(s.session, SESSION_EN[s.session] || s.session, SESSION_TR[s.session])}` : "";
   if (d.voice && document.activeElement !== $("vol")) $("vol").value = d.voice.volume;
   if (d.voice) { $("vtoggle").classList.toggle("on", !!d.voice.on); $("vtoggle").setAttribute("aria-pressed", !!d.voice.on); }
 
@@ -469,31 +550,31 @@ function render(d) {
     if ($("vchoice").innerHTML !== opts) $("vchoice").innerHTML = opts;
   }
   if (d.voice) { $("quiet").classList.toggle("on", !!d.voice.quiet); $("quiet").setAttribute("aria-pressed", !!d.voice.quiet); }
-  if (d.phone) $("phone").title = T(`Affichage téléphone : ${d.phone} (même Wi-Fi que le PC)`, `Phone view: ${d.phone} (same Wi-Fi as the PC)`);
+  if (d.phone) $("phone").title = T(`Affichage téléphone : ${d.phone} (même Wi-Fi que le PC)`, `Phone view: ${d.phone} (same Wi-Fi as the PC)`, `Telefon görünümü: ${d.phone} (PC ile aynı Wi-Fi)`);
   const tmD = d.times || {}, dlt = tmD.delta;
   $("delta").hidden = !(s.on_track && dlt != null);
   if (dlt != null) {
     $("delta").className = dlt < -0.02 ? "fast" : dlt > 0.02 ? "slow" : "";
-    $("delta").innerHTML = `${dlt > 0 ? "+" : dlt < 0 ? "−" : "±"}${Math.abs(dlt).toFixed(2)}<small>vs ${tmD.delta_ref === "record" ? "record" : T("meilleur tour", "best lap")}</small>`;
+    $("delta").innerHTML = `${dlt > 0 ? "+" : dlt < 0 ? "−" : "±"}${Math.abs(dlt).toFixed(2)}<small>vs ${tmD.delta_ref === "record" ? T("record", "record") : T("meilleur tour", "best lap")}</small>`;
   }
   const up = d.update || {};
   if (up.version) $("vernow").textContent = up.version;
   if (up.all) $("verall").href = up.all;
   $("verprev").hidden = !(up.previous && up.previous.version);
   if (up.previous && up.previous.version) {
-    $("verprev").textContent = T(`↩ Revenir à la ${up.previous.version}`, `↩ Go back to ${up.previous.version}`);
+    $("verprev").textContent = T(`↩ Revenir à la ${up.previous.version}`, `↩ Go back to ${up.previous.version}`, `↩ ${up.previous.version} sürümüne dön`);
     $("verprev").href = up.previous.url;
   }
   let hid = null; try { hid = localStorage.getItem("apex-upd-hide"); } catch (e) {}
   $("upd").style.display = up.latest && hid !== up.latest ? "flex" : "none";
   if (up.latest) {
-    $("updtxt").textContent = T(`Nouvelle version ${up.latest} disponible (tu as la ${up.version})`, `New version ${up.latest} available (you have ${up.version})`);
+    $("updtxt").textContent = T(`Nouvelle version ${up.latest} disponible (tu as la ${up.version})`, `New version ${up.latest} available (you have ${up.version})`, `Yeni sürüm ${up.latest} hazır (sendeki ${up.version})`);
     $("updlink").textContent = T("TÉLÉCHARGER", "DOWNLOAD"); $("updlink").href = up.url;
     $("updx").onclick = () => { try { localStorage.setItem("apex-upd-hide", up.latest); } catch (e) {} $("upd").style.display = "none"; };
   }
   const pn = d.penalty || {};
   $("pen").style.display = pn.count ? "block" : "none";
-  if (pn.count) $("pen").textContent = `${T("PÉNALITÉ À PURGER", "PENALTY TO SERVE")}${pn.count > 1 ? " ×" + pn.count : ""}${pn.laps_left != null ? ` · ${pn.laps_left} ${T("TOUR", "LAP")}${pn.laps_left > 1 ? "S" : ""}` : ""}`;
+  if (pn.count) $("pen").textContent = `${T("PÉNALITÉ À PURGER", "PENALTY TO SERVE")}${pn.count > 1 ? " ×" + pn.count : ""}${pn.laps_left != null ? ` · ${pn.laps_left} ${T("TOUR", "LAP")}${pn.laps_left > 1 && LANG !== "tr" ? "S" : ""}` : ""}`;
 
   const [title, text, alert] = callout(s, p, radio);
   $("calltitle").textContent = title; $("calltext").textContent = text;
@@ -508,7 +589,9 @@ function render(d) {
   }
 
   const t = d.ptt || {};
-  const labels = LANG === "en"
+  const labels = LANG === "tr"
+    ? { "prêt": "HAZIR", "écoute": "● DİNLİYORUM…", "réflexion": "DÜŞÜNÜYORUM…", "apprentissage": "İSTEDİĞİN TUŞA BAS…", "erreur": "SORUN", "démarrage": "BAŞLATILIYOR…" }
+    : LANG === "en"
     ? { "prêt": "READY", "écoute": "● LISTENING…", "réflexion": "THINKING…", "apprentissage": "PRESS THE BUTTON YOU WANT…", "erreur": "PROBLEM", "démarrage": "STARTING…" }
     : { "prêt": "PRÊT", "écoute": "● J'ÉCOUTE…", "réflexion": "JE RÉFLÉCHIS…", "apprentissage": "APPUIE SUR LE BOUTON VOULU…", "erreur": "PROBLÈME", "démarrage": "DÉMARRAGE…" };
   $("pttstate").textContent = labels[t.state] || "–";
@@ -536,8 +619,8 @@ function render(d) {
   const total = s.max_laps ? s.max_laps : p.laps_to_finish != null ? Math.round(s.laps_done + s.lap_frac + p.laps_to_finish) : null;
   $("lapbig").innerHTML = `${T("TOUR", "LAP")} ${cur}${total ? ` <small>/ ${s.max_laps ? "" : "~"}${total}</small>` : ""}`;
   const left = total != null ? Math.max(0, total - cur) : null;
-  $("lapleft").innerHTML = (left != null ? (LANG === "en" ? `<b>${left}</b> lap${left !== 1 ? "s" : ""} to go` : `<b>${left}</b> tour${left > 1 ? "s" : ""} restant${left > 1 ? "s" : ""}`) : "") + (s.time_left != null ? ` · ${fmtTime(s.time_left)}` : "");
-  $("lapinfo").textContent = s.class_position && s.class_position !== s.position ? T(`P${s.position} au général · ${s.num_cars} voitures`, `P${s.position} overall · ${s.num_cars} cars`) : T(`${s.num_cars} voitures`, `${s.num_cars} cars`);
+  $("lapleft").innerHTML = (left != null ? (LANG === "tr" ? `<b>${left}</b> tur kaldı` : LANG === "en" ? `<b>${left}</b> lap${left !== 1 ? "s" : ""} to go` : `<b>${left}</b> tour${left > 1 ? "s" : ""} restant${left > 1 ? "s" : ""}`) : "") + (s.time_left != null ? ` · ${fmtTime(s.time_left)}` : "");
+  $("lapinfo").textContent = s.class_position && s.class_position !== s.position ? T(`P${s.position} au général · ${s.num_cars} voitures`, `P${s.position} overall · ${s.num_cars} cars`, `Genelde P${s.position} · ${s.num_cars} araç`) : T(`${s.num_cars} voitures`, `${s.num_cars} cars`, `${s.num_cars} araç`);
   $("gapa").innerHTML = s.gap_ahead != null ? `−${n(s.gap_ahead)} <small class="muted" style="font-size:14px;font-weight:400">${T("devant", "ahead")}</small>` : "–";
   $("gapb").innerHTML = s.gap_behind != null ? `+${n(s.gap_behind)} <small class="muted" style="font-size:14px;font-weight:400">${T("derrière", "behind")}</small>` : "";
 
@@ -556,7 +639,7 @@ function render(d) {
   else {
     box = p.laps_until_box <= 1 ? T("CE TOUR", "THIS LAP") : `${T("TOUR", "LAP")} ${p.box_lap}`; boxCls = p.laps_until_box <= 1 ? "bad" : "glow";
     const tyres = p.tyre_compound === "pluie" ? T("pneus pluie", "wets") : p.tyre_compound === "slicks" ? "slicks" : p.change_tyres ? T("4 pneus", "4 tyres") : p.change_tyres === false ? T("on garde les pneus", "keep tyres") : "";
-    info = [p.fuel_to_add != null ? `+${n(p.fuel_to_add, 0)} L` : "", p.energy_target != null ? `${T("én.", "en.")} ${n(p.energy_target * 100, 0)} %` : "", tyres, T(`${p.stops_needed} arrêt${p.stops_needed > 1 ? "s" : ""}`, `${p.stops_needed} stop${p.stops_needed > 1 ? "s" : ""}`)].filter(Boolean).join(" · ");
+    info = [p.fuel_to_add != null ? `+${n(p.fuel_to_add, 0)} L` : "", p.energy_target != null ? `${T("én.", "en.")} ${n(p.energy_target * 100, 0)} %` : "", tyres, T(`${p.stops_needed} arrêt${p.stops_needed > 1 ? "s" : ""}`, `${p.stops_needed} stop${p.stops_needed > 1 ? "s" : ""}`, `${p.stops_needed} pit stop`)].filter(Boolean).join(" · ");
   }
   if (d.setup_prompt !== undefined) {
     if (setupPrompt !== null && d.setup_prompt > setupPrompt) $("wsopen").click();   // fin de session : on ouvre l'atelier
@@ -570,14 +653,14 @@ function render(d) {
   $("box").textContent = box; $("box").className = boxCls; $("boxinfo").textContent = info;
 
   $("compound").textContent = s.compound ? `· ${s.compound}` : "";
-  $("tyres").innerHTML = (LANG === "en" ? WHEELS_EN : WHEELS).map((w, i) => {
+  $("tyres").innerHTML = (LANG === "tr" ? WHEELS_TR : LANG === "en" ? WHEELS_EN : WHEELS).map((w, i) => {
     const wear = (s.tyre_wear?.[i] ?? 1) * 100;
     const cls = wear < 30 ? "bad" : wear < 50 ? "warn" : "";
     return `<div class="tyre"><small>${w}</small><b class="${cls}">${wear.toFixed(0)}%</b><small>${(s.tyre_temp?.[i] ?? -999) > -100 ? n(s.tyre_temp[i], 0) + "°C" : "–"}<span class="press"> · ${(s.tyre_pressure?.[i] || 0) > 0 ? n(s.tyre_pressure[i], 0) + " kPa" : "–"}</span></small></div>`;
   }).join("");
   $("tyrelaps").textContent = p.tyre_laps_left != null ? n(p.tyre_laps_left) : "–";
 
-  $("weather").textContent = p.weather ? p.weather.split(" — ")[0].replace(/, (piste humide|track ).*$/, "") : T("Sec", "Dry");
+  $("weather").textContent = p.weather ? p.weather.split(" — ")[0].replace(/, (piste humide|track |pist ).*$/, "") : T("Sec", "Dry");
   $("temps").textContent = `${n(s.air_temp, 0)}°C / ${n(s.track_temp, 0)}°C`;
   $("wet").textContent = `${n((s.wetness || 0) * 100, 0)} %`;
   $("fc").innerHTML = (d.forecast || []).filter(f => f.mins > 0).slice(0, 3).map(f =>
@@ -597,11 +680,11 @@ function render(d) {
   if (!race) {
     const vs = tm.record && s.best_lap ? s.best_lap - tm.record : null;
     $("gapa").innerHTML = s.best_lap ? `${fmtLap(s.best_lap)} <small class="muted" style="font-size:14px;font-weight:400">${T("meilleur", "best")}</small>` : "–";
-    $("gapb").innerHTML = vs != null ? `${vs > 0 ? "+" : "−"}${Math.abs(vs).toFixed(2)} <small class="muted" style="font-size:14px;font-weight:400">vs record</small>` : (tm.record ? "" : `<small class="muted" style="font-size:14px;font-weight:400">${T("pas encore de record ici", "no record here yet")}</small>`);
+    $("gapb").innerHTML = vs != null ? `${vs > 0 ? "+" : "−"}${Math.abs(vs).toFixed(2)} <small class="muted" style="font-size:14px;font-weight:400">vs ${T("record", "record")}</small>` : (tm.record ? "" : `<small class="muted" style="font-size:14px;font-weight:400">${T("pas encore de record ici", "no record here yet")}</small>`);
     const gain = tm.ideal && s.best_lap ? s.best_lap - tm.ideal : null;
     $("box").textContent = tm.ideal ? fmtLap(tm.ideal) : "–"; $("box").className = "glow";
     $("boxinfo").textContent = gain != null && gain > 0.005
-      ? T(`Tour idéal (tes meilleurs secteurs) : ${gain.toFixed(2)} s à gagner`, `Ideal lap (your best sectors): ${gain.toFixed(2)} s to gain`)
+      ? T(`Tour idéal (tes meilleurs secteurs) : ${gain.toFixed(2)} s à gagner`, `Ideal lap (your best sectors): ${gain.toFixed(2)} s to gain`, `İdeal tur (en iyi sektörlerin): ${gain.toFixed(2)} sn kazanılabilir`)
       : T("Tour idéal : tes meilleurs secteurs mis bout à bout", "Ideal lap: your best sectors put together");
     $("pitstatus").textContent = "";
   }
@@ -634,7 +717,7 @@ function drawMap(d) {
     mapFetch = now;
     fetch("/api/map").then(r => r.json()).then(j => { mapPts = j.points; mapVer = j.version; mapBox = null; });
   }
-  $("mapnote").textContent = m.ready ? "" : T(`Tracé en cours d'apprentissage : ${m.coverage || 0} % — il sera enregistré pour la prochaine fois.`, `Learning the track layout: ${m.coverage || 0} % — it will be saved for next time.`);
+  $("mapnote").textContent = m.ready ? "" : T(`Tracé en cours d'apprentissage : ${m.coverage || 0} % — il sera enregistré pour la prochaine fois.`, `Learning the track layout: ${m.coverage || 0} % — it will be saved for next time.`, `Pist çizimi öğreniliyor: %${m.coverage || 0} — bir sonraki sefer için kaydedilecek.`);
   if (!mapPts) return;
   const pts = mapPts.filter(Boolean);
   if (pts.length < 10) return;
@@ -687,13 +770,13 @@ function drawMap(d) {
   });
   $("map").innerHTML = svg;
   const B = d.behavior || {};
-  const items = (B.issues || []).slice(0, 2).map(i => `<div class="it"><span class="tag" style="background:${ISSUE_COL[i.kind]}">${T("V", "T")}${i.corner} · ${LANG === "en" ? (KIND_EN[i.kind] || i.kind.toUpperCase()) : i.kind.toUpperCase()}</span><span>${esc(i.text)} — <span class="tip">${esc(i.tip)}</span></span></div>`);
+  const items = (B.issues || []).slice(0, 2).map(i => `<div class="it"><span class="tag" style="background:${ISSUE_COL[i.kind]}">${T("V", "T")}${i.corner} · ${LANG === "fr" ? i.kind.toUpperCase() : ((LANG === "tr" ? KIND_TR : KIND_EN)[i.kind] || i.kind.toUpperCase())}</span><span>${esc(i.text)} — <span class="tip">${esc(i.tip)}</span></span></div>`);
   (B.tyres || []).slice(0, 1).forEach(t => items.push(`<div class="it"><span class="tag" style="background:var(--good)">${T("PNEUS", "TYRES")}</span><span class="tip">${esc(t)}</span></div>`));
   $("behav").innerHTML = items.join("") || (m.ready && (B.laps || 0) >= 3 ? `<div class="it"><span class="tag" style="background:var(--good)">OK</span><span class="tip">${T("Voiture équilibrée, rien de répétitif.", "Car balanced, nothing recurring.")}</span></div>` : "");
   const classes = [...new Map((s.cars || []).map(c => [c.c, c.cls])).entries()];
   $("maplegend").innerHTML = `<span style="color:var(--accent)">●</span> ${T("toi", "you")} · <span style="color:var(--alert)">◯</span> ${T("devant / derrière", "ahead / behind")}` +
     classes.map(([c, name]) => ` · <span style="color:${CLASS_COL[c % CLASS_COL.length]}">●</span> ${esc(name)}`).join("") +
-    (ahead ? T(` · secteurs : <span class="good">vert</span> tu gagnes, <span class="bad">rose</span> tu perds`, ` · sectors: <span class="good">green</span> you gain, <span class="bad">pink</span> you lose`) : "");
+    (ahead ? T(` · secteurs : <span class="good">vert</span> tu gagnes, <span class="bad">rose</span> tu perds`, ` · sectors: <span class="good">green</span> you gain, <span class="bad">pink</span> you lose`, ` · sektörler: <span class="good">yeşil</span> kazanıyorsun, <span class="bad">pembe</span> kaybediyorsun`) : "");
 }
 
 async function tick() {
@@ -710,7 +793,7 @@ function loadMics() {
   }).catch(() => {});
 }
 loadMics();
-$("lang").onclick = () => fetch("/api/lang", { method: "POST", body: JSON.stringify({ lang: LANG === "en" ? "fr" : "en" }) });
+$("lang").onclick = () => fetch("/api/lang", { method: "POST", body: JSON.stringify({ lang: { fr: "en", en: "tr" }[LANG] || "fr" }) });
 $("mic").onchange = () => fetch("/api/mic", { method: "POST", body: JSON.stringify({ index: $("mic").value === "" ? null : Number($("mic").value) }) });
 $("learn").onclick = () => fetch("/api/ptt/learn", { method: "POST" });
 
@@ -726,13 +809,13 @@ function applyAccent(id) {
   document.documentElement.style.setProperty("--accent", h);
   document.documentElement.style.setProperty("--accent-rgb", rgb);
 }
-$("accent").innerHTML = ACCENTS.map(a => `<option value="${a[0]}">${LANG === "en" ? a[2] : a[1]}</option>`).join("");
+$("accent").innerHTML = ACCENTS.map(a => `<option value="${a[0]}">${T(a[1], a[2])}</option>`).join("");
 $("accent").onchange = e => { applyAccent(e.target.value);
   fetch("/api/accent", { method: "POST", body: JSON.stringify({ accent: e.target.value }) }); };
 
 // ---- niveau d'encouragements
 const ENC = [["discret", "Discret", "Low-key"], ["normal", "Normal", "Normal"], ["motivant", "Motivant", "Hype"]];
-$("encourage").innerHTML = ENC.map(e => `<option value="${e[0]}">${LANG === "en" ? e[2] : e[1]}</option>`).join("");
+$("encourage").innerHTML = ENC.map(e => `<option value="${e[0]}">${T(e[1], e[2])}</option>`).join("");
 $("encourage").onchange = e => fetch("/api/encourage", { method: "POST", body: JSON.stringify({ level: e.target.value }) });
 
 // ---- raccourcis : spotter, radio, mode silence
@@ -741,7 +824,7 @@ const SC = [["spotter", "Spotter on / off", "Spotter on / off"], ["radio", "Radi
 function renderShortcuts(t) {
   const sc = t.shortcuts || {}, learning = t.learn_target;
   $("sclist").innerHTML = SC.map(([k, fr, en]) => `<div class="row" style="align-items:center;gap:6px">
-    <span>${LANG === "en" ? en : fr}</span>
+    <span>${T(fr, en)}</span>
     <span style="color:var(--accent);flex:1;text-align:right">${learning === k ? T("appuie sur le bouton…", "press the button…") : esc(sc[k] || T("aucun", "none"))}</span>
     <button data-sc="${k}" class="pill" style="padding:2px 8px">${T("Choisir", "Set")}</button>
     ${sc[k] ? `<button data-scclear="${k}" class="pill" style="padding:2px 8px" title="${T("Retirer", "Remove")}">✕</button>` : ""}</div>`).join("");
@@ -767,7 +850,7 @@ let WS = null, wsTimer = null, wsSeen = new Set();
 async function wsSetDir(path) {
   $("wsdirmsg").textContent = T("Recherche…", "Searching…");
   const r = await (await fetch(path ? "/api/setup/dir" : "/api/setup/pickdir", {method: "POST", body: JSON.stringify({dir: path || ""})})).json();
-  if (r.ok) { $("wsdirmsg").textContent = T(`Dossier trouvé : ${r.dir}`, `Folder found: ${r.dir}`); wsLoad(); }
+  if (r.ok) { $("wsdirmsg").textContent = T(`Dossier trouvé : ${r.dir}`, `Folder found: ${r.dir}`, `Klasör bulundu: ${r.dir}`); wsLoad(); }
   else $("wsdirmsg").textContent = r.cancel ? T("Aucun dossier choisi.", "No folder chosen.") : (r.error || "?");
 }
 document.addEventListener("click", e => {
@@ -777,8 +860,8 @@ document.addEventListener("click", e => {
 async function wsLoad(keepChecks) {
   const checks = keepChecks ? new Set([...document.querySelectorAll(".wschk:checked")].map(c => c.value)) : null;
   WS = await (await fetch("/api/setup")).json();
-  $("wstrack").textContent = WS.track ? T(`Circuit détecté : ${WS.track}`, `Track detected: ${WS.track}`) : T("Aucun circuit détecté pour l'instant (lance le jeu, ou choisis le dossier).", "No track detected yet (start the game, or choose the folder).");
-  $("wserr").textContent = WS.ok === false ? T(`Dossier des setups LMU introuvable : ${WS.dir || ""}`, `LMU setups folder not found: ${WS.dir || ""}`) : "";
+  $("wstrack").textContent = WS.track ? T(`Circuit détecté : ${WS.track}`, `Track detected: ${WS.track}`, `Algılanan pist: ${WS.track}`) : T("Aucun circuit détecté pour l'instant (lance le jeu, ou choisis le dossier).", "No track detected yet (start the game, or choose the folder).");
+  $("wserr").textContent = WS.ok === false ? T(`Dossier des setups LMU introuvable : ${WS.dir || ""}`, `LMU setups folder not found: ${WS.dir || ""}`, `LMU setup klasörü bulunamadı: ${WS.dir || ""}`) : "";
   $("wsdirbox").hidden = WS.ok !== false;
   document.querySelectorAll(".wsmode").forEach(b => b.classList.toggle("on", b.dataset.m === WS.mode));
   const folders = WS.folders || [];
@@ -787,14 +870,14 @@ async function wsLoad(keepChecks) {
     $("wsfolder").innerHTML = folders.map(f => `<option ${f.name === sel ? "selected" : ""}>${esc(f.name)}</option>`).join("");
     fillFiles();
   }
-  $("wscurrent").textContent = WS.factory ? T("Setup en cours : setup d'usine (pas encore enregistré)", "Current setup: default setup (not saved yet)") : WS.current ? T(`Setup en cours : ${WS.current}`, `Current setup: ${WS.current}`) : T("Aucun setup choisi pour ce circuit.", "No setup chosen for this track.");
-  if (WS.mismatch) $("wscurrent").textContent += "  ⚠️ " + T(`Ce setup a été fait pour la ${carLabel(WS.mismatch.setup)}, mais tu es en ${carLabel(WS.mismatch.car)}.`, `This setup was made for the ${carLabel(WS.mismatch.setup)}, but you're in the ${carLabel(WS.mismatch.car)}.`);
+  $("wscurrent").textContent = WS.factory ? T("Setup en cours : setup d'usine (pas encore enregistré)", "Current setup: default setup (not saved yet)") : WS.current ? T(`Setup en cours : ${WS.current}`, `Current setup: ${WS.current}`, `Geçerli setup: ${WS.current}`) : T("Aucun setup choisi pour ce circuit.", "No setup chosen for this track.");
+  if (WS.mismatch) $("wscurrent").textContent += "  ⚠️ " + T(`Ce setup a été fait pour la ${carLabel(WS.mismatch.setup)}, mais tu es en ${carLabel(WS.mismatch.car)}.`, `This setup was made for the ${carLabel(WS.mismatch.setup)}, but you're in the ${carLabel(WS.mismatch.car)}.`, `Bu setup ${carLabel(WS.mismatch.setup)} için hazırlanmış, ama sen ${carLabel(WS.mismatch.car)} kullanıyorsun.`);
   const ch = WS.changes || [];
   if (WS.factory) $("wsstatus").textContent = WS.error || "";
   else if (!WS.current) $("wsstatus").textContent = T("Choisis d'abord le setup chargé dans le jeu (étape 1).", "First choose the setup loaded in the game (step 1).");
   renderRace();
   if (WS.factory || !WS.current) {}
-  else if ((WS.analysis_laps || 0) < 3 && !ch.some(c => c.live || c.fuel)) $("wsstatus").textContent = T(`Fais quelques tours propres : l'analyse en a ${WS.analysis_laps || 0}, il en faut au moins 3.`, `Do a few clean laps: the analysis has ${WS.analysis_laps || 0}, it needs at least 3.`);
+  else if ((WS.analysis_laps || 0) < 3 && !ch.some(c => c.live || c.fuel)) $("wsstatus").textContent = T(`Fais quelques tours propres : l'analyse en a ${WS.analysis_laps || 0}, il en faut au moins 3.`, `Do a few clean laps: the analysis has ${WS.analysis_laps || 0}, it needs at least 3.`, `Birkaç temiz tur at: analizde ${WS.analysis_laps || 0} tur var, en az 3 gerekli.`);
   else $("wsstatus").textContent = ch.length ? T("Coche les réglages à appliquer :", "Tick the changes to apply:") : T("Rien à changer pour l'instant : la voiture est équilibrée.", "Nothing to change for now: the car is balanced.");
   $("wstable").innerHTML = ch.length ? `<tr><th></th><th>${T("Réglage", "Setting")}</th><th>${T("Actuel", "Current")}</th><th>${T("Proposé", "Suggested")}</th></tr>` + ch.map(c => {
     const k = `${c.section}|${c.key}`, on = checks && wsSeen.has(k) ? checks.has(k) : true;
@@ -809,7 +892,7 @@ async function wsLoad(keepChecks) {
   let hist = vers.map(v => {
     const r = res[v.label] || {};
     const active = onApex && v.label === WS.apex_label;
-    const title = v.origin ? T(`v1 · ton setup de départ (${esc(v.base)})`, `v1 · your starting setup (${esc(v.base)})`) : `${v.label} · ${T("depuis", "from")} ${esc(v.base)}`;
+    const title = v.origin ? T(`v1 · ton setup de départ (${esc(v.base)})`, `v1 · your starting setup (${esc(v.base)})`, `v1 · başlangıç setup'ın (${esc(v.base)})`) : `${v.label} · ${T("depuis", "from")} ${esc(v.base)}`;
     const star = r.best && r.best === best ? ` <span class="good">★ ${T("la plus rapide", "fastest")}</span>` : "";
     return `<div class="ver"><b style="color:${active ? "var(--accent)" : "var(--text)"}">${title}</b>${active ? ` · <span style='color:var(--accent)'>${T("dans le fichier APEX", "in the APEX file")}</span>` : ""} · ${esc(v.date)}<br>
       ${T("Meilleur tour", "Best lap")} : <b>${fmtLap(r.best)}</b> (${r.laps || 0} ${T("tours", "laps")})${star}<br>
@@ -818,11 +901,11 @@ async function wsLoad(keepChecks) {
   }).join("");
   const baseRes = !vers.length && WS.label && res[WS.label] ? `<div class="ver"><b>${esc(WS.label)}</b> (${T("setup de départ", "starting setup")})<br>${T("Meilleur tour", "Best lap")} : <b>${fmtLap(res[WS.label].best)}</b> (${res[WS.label].laps || 0} ${T("tours", "laps")})</div>` : "";
   $("wshist").innerHTML = (WS.apex_file ? T(`Fichier dans LMU : <b>${esc(WS.apex_file)}</b> (un seul fichier ${WS.mode === "Qualif" ? "qualif" : "course"}, mis à jour à chaque version)`,
-                                            `File in LMU: <b>${esc(WS.apex_file)}</b> (one ${WS.mode === "Qualif" ? "qualifying" : "race"} file, updated with each version)`) : "")
+                                            `File in LMU: <b>${esc(WS.apex_file)}</b> (one ${WS.mode === "Qualif" ? "qualifying" : "race"} file, updated with each version)`, `LMU'daki dosya: <b>${esc(WS.apex_file)}</b> (tek bir ${WS.mode === "Qualif" ? "sıralama" : "yarış"} dosyası, her sürümde güncellenir)`) : "")
     + (hist + baseRes || T("<br>Pas encore de version créée par Apex Radio sur ce circuit.", "<br>No version created by Apex Radio on this track yet."));
   document.querySelectorAll(".wsrestore").forEach(b => b.onclick = async () => {
     const r = await (await fetch("/api/setup/restore", { method: "POST", body: JSON.stringify({ version: Number(b.dataset.v) }) })).json();
-    $("wsresult").innerHTML = r.error ? `<span class="bad">${esc(r.error)}</span>` : T(`<span class="good">${esc(r.file)} remis en ${esc(r.version)}</span> — recharge-le au garage dans LMU.`, `<span class="good">${esc(r.file)} restored to ${esc(r.version)}</span> — reload it in the LMU garage.`);
+    $("wsresult").innerHTML = r.error ? `<span class="bad">${esc(r.error)}</span>` : T(`<span class="good">${esc(r.file)} remis en ${esc(r.version)}</span> — recharge-le au garage dans LMU.`, `<span class="good">${esc(r.file)} restored to ${esc(r.version)}</span> — reload it in the LMU garage.`, `<span class="good">${esc(r.file)}, ${esc(r.version)} sürümüne döndürüldü</span> — LMU'da garajdan yeniden yükle.`);
     wsLoad(false);
   });
 }
@@ -836,7 +919,7 @@ function renderRace() {
   const f = WS.fuel || {}, box = $("wsrace");
   if (WS.mode !== "Course") { box.innerHTML = ""; return; }
   if (document.activeElement && box.contains(document.activeElement)) return;
-  const conso = f.fpl ? T(`conso mesurée ${f.fpl.toFixed(2).replace(".", ",")} L/tour`, `measured consumption ${f.fpl.toFixed(2)} L/lap`) : T("conso pas encore mesurée", "consumption not measured yet");
+  const conso = f.fpl ? T(`conso mesurée ${f.fpl.toFixed(2).replace(".", ",")} L/tour`, `measured consumption ${f.fpl.toFixed(2)} L/lap`, `ölçülen tüketim ${f.fpl.toFixed(2).replace(".", ",")} L/tur`) : T("conso pas encore mesurée", "consumption not measured yet");
   const res = f.litres ? `<b style="color:#FFE500">${f.litres} L ${T("au départ", "at the start")}</b> (${esc(f.why)})` : esc(f.why || "");
   box.innerHTML = `<div class="race"><span>${T("Durée de la course", "Race length")}</span><input id="racemin" type="number" min="5" max="1440" step="5" value="${f.race_min || ""}" aria-label="${T("Durée de la course en minutes", "Race length in minutes")}"> min
     <span class="muted">${T("ou", "or")}</span><input id="racelaps" type="number" min="1" max="500" value="${f.race_laps || ""}" aria-label="${T("Nombre de tours", "Number of laps")}"> ${T("tours", "laps")}
@@ -891,7 +974,7 @@ $("wscreate").onclick = async () => {
   const keys = [...document.querySelectorAll(".wschk:checked")].map(c => c.value);
   if (!keys.length) return;
   const r = await (await fetch("/api/setup/create", { method: "POST", body: JSON.stringify({ keys }) })).json();
-  $("wsresult").innerHTML = r.error ? `<span class="bad">${esc(r.error)}</span>` : T(`<span class="good">${esc(r.file)} mis à jour (${esc(r.version)})</span> — recharge-le au garage dans LMU, puis roule quelques tours pour comparer.`, `<span class="good">${esc(r.file)} updated (${esc(r.version)})</span> — reload it in the LMU garage, then do a few laps to compare.`);
+  $("wsresult").innerHTML = r.error ? `<span class="bad">${esc(r.error)}</span>` : T(`<span class="good">${esc(r.file)} mis à jour (${esc(r.version)})</span> — recharge-le au garage dans LMU, puis roule quelques tours pour comparer.`, `<span class="good">${esc(r.file)} updated (${esc(r.version)})</span> — reload it in the LMU garage, then do a few laps to compare.`, `<span class="good">${esc(r.file)} güncellendi (${esc(r.version)})</span> — LMU'da garajdan yeniden yükle, sonra karşılaştırmak için birkaç tur at.`);
   wsLoad(false);
 };
 tick();

@@ -39,8 +39,9 @@ VOICES = {
     "john":     ("en", "en_US-john-medium", "en/en_US/john/medium/", 0, "John", False, 64),     # domaine public (LibriVox)
     "northern": ("en", "en_GB-northern_english_male-medium", "en/en_GB/northern_english_male/medium/", 0,
                  "Northern", False, 63),                                                       # CC BY-SA 4.0 (OpenSLR 83)
+    "kaan":     ("tr", "tr_TR-dfki-medium", "tr/tr_TR/dfki/medium/", 0, "Kaan", False, 63),          # CC BY-NC-SA 4.0 (DFKI) : usage non commercial seulement
 }
-DEFAULT = {"fr": "jessica", "en": "lj"}
+DEFAULT = {"fr": "jessica", "en": "lj", "tr": "kaan"}
 CHOICE = dict(DEFAULT)   # langue -> id de voix choisie (rempli depuis config.json au démarrage)
 
 
@@ -51,7 +52,7 @@ def current_id(lang: str | None = None) -> str:
 
 
 def L_ready(name: str) -> str:
-    return i18n.L(f"Ici {name}, je prends la radio.", f"{name} here, I've got the radio.")
+    return i18n.L(f"Ici {name}, je prends la radio.", f"{name} here, I've got the radio.", f"Ben {name}, telsiz bende.")
 
 
 def engineer_name() -> str:
@@ -74,10 +75,37 @@ SPEED = 0.92         # < 1 = plus rapide
 RADIO_EFFECT = True
 
 
+_TR_UNITS = ["", "bir", "iki", "üç", "dört", "beş", "altı", "yedi", "sekiz", "dokuz"]
+_TR_UNITS_ORD = ["", "birinci", "ikinci", "üçüncü", "dördüncü", "beşinci", "altıncı", "yedinci", "sekizinci", "dokuzuncu"]
+_TR_TENS = ["", "on", "yirmi", "otuz", "kırk", "elli", "altmış", "yetmiş", "seksen", "doksan"]
+_TR_TENS_ORD = ["", "onuncu", "yirminci", "otuzuncu", "kırkıncı", "ellinci", "altmışıncı", "yetmişinci", "sekseninci", "doksanıncı"]
+
+
+def ordinal_tr(n: int) -> str:
+    """5 -> « beşinci », 12 -> « on ikinci », 120 -> « yüz yirminci » (1 à 999)."""
+    if not 0 < n < 1000:
+        return f"{n}."
+    h, t, u = n // 100, n // 10 % 10, n % 10
+    words = [] if not h else ["yüz"] if h == 1 else [_TR_UNITS[h], "yüz"]
+    if u:
+        words += [_TR_TENS[t], _TR_UNITS_ORD[u]]
+    elif t:
+        words.append(_TR_TENS_ORD[t])
+    else:
+        words[-1] = "yüzüncü"
+    return " ".join(w for w in words if w)
+
+
 def spoken(text: str) -> str:
     """Adapte le texte pour qu'il soit bien prononcé."""
     if i18n.en():
         text = text.replace("%", " percent").replace("°", " degrees")
+    elif i18n.tr():
+        text = re.sub(r"(\d)\.(\d)", r"\1,\2", text)      # 3.6 -> 3,6
+        text = re.sub(r"(\d+(?:,\d+)?)\s?%", r"yüzde \1", text)   # 50 % -> yüzde 50
+        text = text.replace("%", "yüzde ").replace("°", " derece")
+        # « 5. virajda » -> « beşinci virajda » : sinon la voix s'arrête au point
+        text = re.sub(r"\b(\d{1,3})\. (?=[a-zçğıöşü])", lambda m: ordinal_tr(int(m.group(1))) + " ", text)
     else:
         text = re.sub(r"(\d)\.(\d)", r"\1,\2", text)      # 3.6 -> 3,6
         text = text.replace("%", " pour cent").replace("°", " degrés")
@@ -253,7 +281,7 @@ class Voice:
         cfg = SynthesisConfig(speaker_id=getattr(self, "speaker", SPEAKER), length_scale=SPEED)
         pcm = bytearray()
         rate = 22050
-        if not i18n.en():
+        if i18n.fr():
             text = speakable_fr(text)
         for chunk in self._piper.synthesize(text, syn_config=cfg):
             pcm += chunk.audio_int16_bytes
