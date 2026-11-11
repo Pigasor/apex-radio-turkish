@@ -48,7 +48,7 @@ jobs:
       - name: Voix turque + reconnaissance vocale incluses (rien à télécharger au 1er lancement)
         shell: pwsh
         run: |
-          $m = "build\app\models"
+          $m = "build\app\bundled"   # pas « models » : paths.migrate() le déplacerait hors du dossier de l'appli
           New-Item -ItemType Directory -Force "$m\whisper\small" | Out-Null
           $files = @{
             "$m\tr_TR-dfki-medium.onnx"      = "https://huggingface.co/rhasspy/piper-voices/resolve/main/tr/tr_TR/dfki/medium/tr_TR-dfki-medium.onnx"
@@ -62,7 +62,7 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw "téléchargement impossible : $($files[$dest])" }
           }
           Get-ChildItem -Recurse $m -File | ForEach-Object { "{0,12:N0}  {1}" -f $_.Length, $_.FullName }
-          build\app\python\python.exe -c "from faster_whisper import WhisperModel; WhisperModel(r'build\app\models\whisper\small', device='cpu', compute_type='int8'); from piper import PiperVoice; PiperVoice.load(r'build\app\models\tr_TR-dfki-medium.onnx', config_path=r'build\app\models\tr_TR-dfki-medium.onnx.json'); print('modèles OK')"
+          build\app\python\python.exe -c "from faster_whisper import WhisperModel; WhisperModel(r'build\app\bundled\whisper\small', device='cpu', compute_type='int8'); from piper import PiperVoice; PiperVoice.load(r'build\app\bundled\tr_TR-dfki-medium.onnx', config_path=r'build\app\bundled\tr_TR-dfki-medium.onnx.json'); print('modèles OK')"
 
       - name: Test de démarrage (import de l'appli)
         shell: pwsh
@@ -78,6 +78,9 @@ jobs:
       - name: Installateur (Inno Setup)
         shell: pwsh
         run: |
+          foreach ($f in "build\app\bundled\whisper\small\model.bin", "build\app\bundled\tr_TR-dfki-medium.onnx") {
+            if (-not (Test-Path $f)) { throw "modèle absent avant l'installateur : $f" }
+          }
           if (-not (Get-Command iscc -ErrorAction SilentlyContinue)) { choco install innosetup -y --no-progress }
           $iscc = (Get-Command iscc -ErrorAction SilentlyContinue).Source
           if (-not $iscc) { $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }

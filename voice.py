@@ -26,7 +26,7 @@ from pathlib import Path
 HERE = Path(__file__).parent
 from paths import DATA, LOCAL  # noqa: E402
 MODELS = LOCAL / "models"
-BUNDLED = HERE / "models"   # voix fournie avec l'installateur (rien à télécharger)
+BUNDLED = HERE / "bundled"   # fournie avec l'installateur (pas « models » : paths.migrate() le déplacerait)
 import i18n
 
 # Voix proposées : seulement des licences libres sans restriction commerciale (vérifié sur les MODEL_CARD de Piper).
