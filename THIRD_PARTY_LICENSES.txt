@@ -11,7 +11,11 @@ Voices (Piper models, chosen in the dashboard; downloaded only when selected):
   Kristin (English)                  Public domain    en_US-kristin-medium · LibriVox recordings (https://librivox.org)
   John (English)                     Public domain    en_US-john-medium · LibriVox recordings (https://librivox.org)
   Northern (English)                 CC BY-SA 4.0     en_GB-northern_english_male-medium · OpenSLR 83 (http://www.openslr.org/83/)
+  Kaan (Turkish, offline)            CC BY-NC-SA 4.0  tr_TR-dfki-medium · DFKI / MaryTTS (https://github.com/marytts/dfki-ot-data) · non-commercial use only; bundled with the Turkish installer
   Voice models: rhasspy/piper-voices (https://huggingface.co/rhasspy/piper-voices)
+Ceren / Kaan (Turkish, online)     Microsoft service    tr-TR-EmelNeural / tr-TR-AhmetNeural, Edge read-aloud service; needs internet, message text is sent to Microsoft
+edge-tts                           LGPL-3.0             https://github.com/rany2/edge-tts · used as a separate, replaceable library
+aiohttp, certifi, tabulate         Apache-2.0, MPL-2.0, MIT
 faster-whisper                     MIT                  https://github.com/SYSTRAN/faster-whisper
 CTranslate2                        MIT                  https://github.com/OpenNMT/CTranslate2
 Whisper "small" model              MIT                  OpenAI
@@ -31,5 +35,5 @@ bottle, proxy_tools                MIT
 Microsoft Edge WebView2 Runtime    Microsoft licence    Part of Windows, not bundled
 Orbitron font (dashboard)          SIL OFL 1.1          Loaded from Google Fonts
 
-Voices and speech models are downloaded on first use from Hugging Face; they are not bundled.
+Voices and speech models are downloaded on first use from Hugging Face; the Turkish installer bundles the DFKI Turkish voice and the Whisper "small" model.
 Le Mans Ultimate is a trademark of its owners. Apex Radio is not affiliated with Studio 397, Motorsport Games or the ACO.

@@ -24,7 +24,7 @@ HERE = Path(__file__).resolve().parent
 
 
 def _num(v: str) -> tuple[int, ...]:
-    return tuple(int(x) for x in re.findall(r"\d+", v)[:3]) or (0,)
+    return tuple(int(x) for x in re.findall(r"\d+", v)[:4]) or (0,)   # 4 : « 1.2.9-tr2 » > « 1.2.9-tr »
 
 
 def current() -> str:

@@ -1,5 +1,10 @@
 # Apex Radio — historique des versions / changelog
 
+## 1.2.9-tr2
+- 🇹🇷 Ceren (kadın) ve doğal Kaan: Microsoft'un çevrimiçi Türkçe sinirsel sesleri (edge-tts). İnternet yoksa veya servis yavaşsa çevrimdışı Kaan; spotter cümleleri önceden hazırlanır ve beklerken bile anında söylenir.
+- 🇹🇷 Çevrimdışı Kaan: daha az rastgele uzama (noise_w 0.35), Türkçe vurgu düzeltmeleri, yabancı kelimelerin okunuşu (setap, andırkat, Ge Te 3).
+- 🇹🇷 Ceza cümlesi: "drive-through / stop and go" yerine "pitten geçiş / dur-kalk cezası".
+
 ## 1.2.9-tr
 - 🇹🇷 Türkçe sürüm: mühendis Türkçe konuşuyor ve Türkçe sesli komutları anlıyor; gösterge paneli, telefon görünümü, setup atölyesi ve özetler Türkçe. Türkçe ses: DFKI (CC BY-NC-SA 4.0).
 - 🇹🇷 Türkçe ses ve ses tanıma modeli kurulum dosyasına dahil: ilk açılışta indirme yok. Kaynaktan çalıştırınca model ilerleme yüzdesiyle indiriliyor ve sunucu takılırsa kaldığı yerden sürüyor (önceden indirme sessizdi ve takılmış gibi görünüyordu).

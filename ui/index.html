@@ -544,8 +544,8 @@ function render(d) {
     const dl = d.voice.downloading;
     const opts = d.voice.list.map(o => {
       const tag = o.female ? T("femme", "female") : T("homme", "male");
-      const extra = dl && dl.name === o.name ? ` · ${dl.pct} %` : (o.ready ? "" : ` · ${o.mb} Mo`);
-      return `<option value="${o.id}" ${o.id === d.voice.choice ? "selected" : ""}>${esc(o.name)} (${tag})${extra}</option>`;
+      const extra = dl && dl.name === o.name ? ` · ${dl.pct} %` : o.online ? " · internet" : (o.ready ? "" : ` · ${o.mb} Mo`);
+      return `<option value="${o.id}" ${o.id === d.voice.choice ? "selected" : ""}>${esc(o.label || o.name)} (${tag})${extra}</option>`;
     }).join("");
     if ($("vchoice").innerHTML !== opts) $("vchoice").innerHTML = opts;
   }

@@ -40,8 +40,21 @@ VOICES = {
     "john":     ("en", "en_US-john-medium", "en/en_US/john/medium/", 0, "John", False, 64),     # domaine public (LibriVox)
     "northern": ("en", "en_GB-northern_english_male-medium", "en/en_GB/northern_english_male/medium/", 0,
                  "Northern", False, 63),                                                       # CC BY-SA 4.0 (OpenSLR 83)
-    "kaan":     ("tr", "tr_TR-dfki-medium", "tr/tr_TR/dfki/medium/", 0, "Kaan", False, 63),          # CC BY-NC-SA 4.0 (DFKI) : usage non commercial seulement
+    # turc : Ceren et Kaan parlent avec les voix neuronales de Microsoft (en ligne, voir ONLINE) ;
+    # sans internet, c'est la voix Piper indiquée ici (DFKI, CC BY-NC-SA 4.0 : usage non commercial) qui prend le relais
+    "ceren":    ("tr", "tr_TR-dfki-medium", "tr/tr_TR/dfki/medium/", 0, "Ceren", True, 63),
+    "kaan":     ("tr", "tr_TR-dfki-medium", "tr/tr_TR/dfki/medium/", 0, "Kaan", False, 63),
+    "kaan_cd":  ("tr", "tr_TR-dfki-medium", "tr/tr_TR/dfki/medium/", 0, "Kaan", False, 63),   # « Kaan · çevrimdışı » dans le menu
 }
+# id -> (voix Microsoft, débit, hauteur). Service de lecture à voix haute d'Edge (paquet edge-tts) : il faut internet,
+# et le texte des messages part chez Microsoft. Pas une API officielle : si elle ne répond plus, Piper prend le relais.
+ONLINE = {"ceren": ("tr-TR-EmelNeural", "+5%", "+10Hz"), "kaan": ("tr-TR-AhmetNeural", "+8%", "+0Hz")}
+# préparés dès le chargement de la voix en ligne : spotter d'abord, puis les messages urgents au texte fixe
+PREWARM_TR = ("Üç araç yan yana!", "Solda araç!", "Sağda araç!", "Temiz.", "Tüm pistte sarı bayrak! Yavaşla.",
+              "Sarı bayrak bitti, yarış devam ediyor.", "Damalı bayrak! Tebrikler.", "Bu tur box.",
+              "Dikkat, lastikler ve frenler soğuk. İlk frenajda yavaş.",
+              "Lastikler ve frenler ısındı. Hadi, artık bastırabilirsin!",
+              "Cezayı çekmek için son tur, bu turun sonunda pite gir!", "Araçtan bir parça koptu.")
 DEFAULT = {"fr": "jessica", "en": "lj", "tr": "kaan"}
 CHOICE = dict(DEFAULT)   # langue -> id de voix choisie (rempli depuis config.json au démarrage)
 
@@ -67,8 +80,9 @@ def engineer_female() -> bool:
 def catalog(lang: str | None = None) -> list[dict]:
     """Voix proposées pour une langue, pour le menu du tableau de bord."""
     lang = lang or i18n.LANG
-    return [{"id": k, "name": v[4], "female": v[5], "mb": v[6],
-             "ready": (MODELS / f"{v[1]}.onnx").exists() or (BUNDLED / f"{v[1]}.onnx").exists()}
+    return [{"id": k, "name": v[4], "female": v[5], "mb": v[6], "online": k in ONLINE,
+             "label": v[4] + (" · çevrimdışı" if k.endswith("_cd") else ""),
+             "ready": k in ONLINE or (MODELS / f"{v[1]}.onnx").exists() or (BUNDLED / f"{v[1]}.onnx").exists()}
             for k, v in VOICES.items() if v[0] == lang]
 BASE_URL = "https://huggingface.co/rhasspy/piper-voices/resolve/main/"
 SPEAKER = 0
@@ -176,7 +190,7 @@ _TR_SPELL = [
 ]
 
 
-def spoken(text: str) -> str:
+def spoken(text: str, keep_excl: bool = False) -> str:
     """Adapte le texte pour qu'il soit bien prononcé."""
     if i18n.en():
         text = text.replace("%", " percent").replace("°", " degrees")
@@ -192,7 +206,8 @@ def spoken(text: str) -> str:
         text = re.sub(r"(\d)\.(\d)", r"\1,\2", text)      # 3.6 -> 3,6
         text = text.replace("%", " pour cent").replace("°", " degrés")
     text = re.sub(r"\bP(\d+)\b", r"P \1", text)
-    text = text.replace("!", ".")
+    if not keep_excl:
+        text = text.replace("!", ".")
     return text
 
 
@@ -276,6 +291,8 @@ class Voice:
         self._piper = None
         self.loaded = None          # (langue, id de voix) actuellement chargé
         self.downloading = None     # {"name": ..., "pct": ...} pendant un téléchargement
+        self._cache: dict = {}      # (voix en ligne, texte) -> (pcm16, débit) : phrases déjà reçues
+        self._offline_until = 0.0   # voix en ligne injoignable : Piper jusqu'à cette heure
         threading.Thread(target=self._worker, daemon=True).start()
 
     # ------------------------------------------------------------ chargement
@@ -299,6 +316,10 @@ class Voice:
             self.speaker = speaker
             self.loaded = (i18n.LANG, vid)
             self.engine = f"Piper · {shown}"
+            if vid in ONLINE:
+                self.engine = f"Microsoft · {shown}"
+                # les phrases du spotter doivent partir tout de suite : on les prépare dès maintenant
+                threading.Thread(target=self._prewarm, args=(vid,), daemon=True).start()
         except Exception as e:
             import traceback; traceback.print_exc()
             self.loaded = (i18n.LANG, current_id())   # pas de nouvel essai à chaque annonce
@@ -380,6 +401,119 @@ class Voice:
             w.writeframes(data)
         return buf.getvalue()
 
+    def _online_pcm(self, vid: str, text: str, timeout: float = 8.0) -> tuple[bytes, int]:
+        """Texte -> PCM 16 bits mono avec la voix Microsoft de vid (mis en cache)."""
+        key = (vid, text)
+        if key in self._cache:
+            return self._cache[key]
+        import asyncio
+        import edge_tts
+        name, rate, pitch = ONLINE[vid]
+
+        async def fetch() -> bytes:
+            buf = bytearray()
+            async for ch in edge_tts.Communicate(text, name, rate=rate, pitch=pitch).stream():
+                if ch["type"] == "audio":
+                    buf += ch["data"]
+            return bytes(buf)
+
+        mp3 = asyncio.run(asyncio.wait_for(fetch(), timeout))
+        if not mp3:
+            raise ConnectionError("pas d'audio")
+        import av
+        rs = av.AudioResampler(format="s16", layout="mono", rate=24000)
+        with av.open(io.BytesIO(mp3)) as c:
+            pcm = b"".join(bytes(f.planes[0])[: f.samples * 2] for fr in c.decode(audio=0) for f in rs.resample(fr))
+        out = (pcm, 24000)
+        if len(self._cache) > 300:
+            self._cache.pop(next(iter(self._cache)))
+        self._cache[key] = out
+        return out
+
+    def _quiet_fetch(self, vid: str, text: str, timeout: float = 20.0) -> bool:
+        try:
+            self._online_pcm(vid, text, timeout)
+            return True
+        except Exception as e:
+            print(f"  Voix en ligne : {text!r} pas reçu ({e!r})")
+            return False
+
+    def _prewarm(self, vid: str) -> None:
+        import time as _t
+        for msg in PREWARM_TR:
+            for attempt in range(3):   # le 1er contact avec le service peut être lent
+                if current_id() != vid or self._quiet_fetch(vid, spoken(msg, keep_excl=True)):
+                    break
+                _t.sleep(5)
+
+    def _render_online(self, vid: str, text: str, spot: bool, urgent: bool = False) -> bytes | None:
+        """None : pas de voix en ligne (hors connexion, trop lent, ou phrase du spotter pas encore prête)."""
+        import time as _t
+        t = spoken(text, keep_excl=True)
+        if (vid, t) not in self._cache:
+            if spot or _t.monotonic() < self._offline_until:
+                if spot:   # pas d'attente pour le spotter : Piper maintenant, la voix en ligne la prochaine fois
+                    threading.Thread(target=self._quiet_fetch, args=(vid, t), daemon=True).start()
+                return None
+            # le service répond en ~2 à 4 s, parfois bien plus : un message urgent n'attend pas plus de 5 s
+            limit = 5.0 if urgent else 10.0
+            res: dict = {}
+
+            def fetch() -> None:
+                try:
+                    self._online_pcm(vid, t, 30.0)   # finit en arrière-plan : servira la prochaine fois
+                except Exception as e:
+                    res["err"] = e
+            th = threading.Thread(target=fetch, daemon=True)
+            th.start()
+            start = _t.monotonic()
+            while th.is_alive() and _t.monotonic() - start < limit:
+                th.join(0.1)
+                self._serve_spotter()     # « à gauche » ne doit pas attendre la voix en ligne
+            if "err" in res:
+                self._offline_until = _t.monotonic() + 60
+                print(f"  Voix en ligne injoignable ({res['err']!r}) : voix hors ligne pendant une minute.")
+                return None
+            if (vid, t) not in self._cache:
+                print(f"  Voix en ligne trop lente (> {limit:.0f} s) : voix hors ligne pour ce message.")
+                return None
+        pcm, rate = self._cache[(vid, t)]
+        data = _radio(pcm, rate, self.volume) if RADIO_EFFECT else pcm
+        buf = io.BytesIO()
+        with wave.open(buf, "wb") as w:
+            w.setnchannels(1); w.setsampwidth(2); w.setframerate(rate)
+            w.writeframes(data)
+        return buf.getvalue()
+
+    def _serve_spotter(self) -> None:
+        """Pendant l'attente de la voix en ligne : dit tout de suite un message du spotter arrivé entre-temps."""
+        import time as _t
+        try:
+            item = self._q.get_nowait()
+        except queue.Empty:
+            return
+        if item[0] != -1:            # pas du spotter : on le remet à sa place
+            self._q.put(item)
+            return
+        _, _, text, t0, _ = item
+        if _t.monotonic() - t0 > 1.2 or not self.enabled:
+            return
+        print(f"  [radio] {text}")
+        vid = current_id()
+        t = spoken(text, keep_excl=True)
+        if (vid, t) in self._cache:
+            pcm, rate = self._cache[(vid, t)]
+            self._play_pcm(_radio(pcm, rate, self.volume) if RADIO_EFFECT else pcm, rate)
+        elif self._piper is not None:
+            self._play(self._render_piper(spoken(text)))
+
+    def _play_pcm(self, pcm: bytes, rate: int) -> None:
+        buf = io.BytesIO()
+        with wave.open(buf, "wb") as w:
+            w.setnchannels(1); w.setsampwidth(2); w.setframerate(rate)
+            w.writeframes(pcm)
+        self._play(buf.getvalue())
+
     def _play(self, wav: bytes) -> None:
         if sys.platform == "win32":
             import winsound
@@ -401,7 +535,7 @@ class Voice:
     def _worker(self) -> None:
         self._load()
         while True:
-            _, _, text, t0, spot = self._q.get()
+            prio, _, text, t0, spot = self._q.get()
             import time as _t
             if self.loaded != (i18n.LANG, current_id()):   # langue ou voix changée : on charge l'autre voix
                 self._load()
@@ -411,6 +545,11 @@ class Voice:
             if not self.enabled:
                 continue
             try:
+                vid = current_id()
+                wav = self._render_online(vid, text, spot, urgent=prio == 0) if vid in ONLINE else None
+                if wav:
+                    self._play(wav)
+                    continue
                 t = spoken(text)
                 if self._piper is not None:
                     self._play(self._render_piper(t))
