@@ -2,7 +2,7 @@
 
 ## 1.2.9-tr
 - 🇹🇷 Türkçe sürüm: mühendis Türkçe konuşuyor ve Türkçe sesli komutları anlıyor; gösterge paneli, telefon görünümü, setup atölyesi ve özetler Türkçe. Türkçe ses: DFKI (CC BY-NC-SA 4.0).
-- 🇹🇷 Ses tanıma modeli ilk açılışta ilerleme yüzdesiyle indiriliyor (önceden indirme sessizdi ve takılmış gibi görünüyordu).
+- 🇹🇷 Türkçe ses ve ses tanıma modeli kurulum dosyasına dahil: ilk açılışta indirme yok. Kaynaktan çalıştırınca model ilerleme yüzdesiyle indiriliyor ve sunucu takılırsa kaldığı yerden sürüyor (önceden indirme sessizdi ve takılmış gibi görünüyordu).
 
 ## 1.2.9
 - 🇫🇷 L'ingénieur parle mieux français : « une place », « 1 tour », « 3 minutes », « 2,3 secondes », « suspension avant droite », « à moins d'une seconde », et une meilleure prononciation de setup, ELMS, Hypercar et GT3. Les dégâts aéro ne dépassent plus 100 %.

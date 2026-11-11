@@ -168,8 +168,8 @@ class Radio:
         """Dossier du modèle Whisper. Téléchargé une seule fois, fichier par fichier, avec la progression
         affichée (console + tableau de bord) : sinon le téléchargement de ~480 Mo a l'air bloqué."""
         root = LOCAL / "models" / "whisper"
-        # déjà là : notre dossier, ou le cache Hugging Face des anciennes versions
-        for d in [root / WHISPER_MODEL, *root.glob(f"models--Systran--faster-whisper-{WHISPER_MODEL}/snapshots/*")]:
+        # déjà là : fourni avec l'installateur, notre dossier, ou le cache Hugging Face des anciennes versions
+        for d in [HERE / "models" / "whisper" / WHISPER_MODEL, root / WHISPER_MODEL, *root.glob(f"models--Systran--faster-whisper-{WHISPER_MODEL}/snapshots/*")]:
             if all((d / f).exists() for f in WHISPER_FILES):
                 return d
         import urllib.request

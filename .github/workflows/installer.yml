@@ -45,6 +45,25 @@ jobs:
           build\app\python\python.exe -m pip install --no-warn-script-location -r requirements.txt
           build\app\python\python.exe -c "import piper, faster_whisper, sounddevice, pygame, pystray, PIL, webview; print('composants OK')"
 
+      - name: Voix turque + reconnaissance vocale incluses (rien à télécharger au 1er lancement)
+        shell: pwsh
+        run: |
+          $m = "build\app\models"
+          New-Item -ItemType Directory -Force "$m\whisper\small" | Out-Null
+          $files = @{
+            "$m\tr_TR-dfki-medium.onnx"      = "https://huggingface.co/rhasspy/piper-voices/resolve/main/tr/tr_TR/dfki/medium/tr_TR-dfki-medium.onnx"
+            "$m\tr_TR-dfki-medium.onnx.json" = "https://huggingface.co/rhasspy/piper-voices/resolve/main/tr/tr_TR/dfki/medium/tr_TR-dfki-medium.onnx.json"
+          }
+          foreach ($f in "config.json", "tokenizer.json", "vocabulary.txt", "model.bin") {
+            $files["$m\whisper\small\$f"] = "https://huggingface.co/Systran/faster-whisper-small/resolve/main/$f"
+          }
+          foreach ($dest in $files.Keys) {
+            curl.exe -fL --retry 10 --retry-all-errors --retry-delay 5 -C - -o $dest $files[$dest]
+            if ($LASTEXITCODE -ne 0) { throw "téléchargement impossible : $($files[$dest])" }
+          }
+          Get-ChildItem -Recurse $m -File | ForEach-Object { "{0,12:N0}  {1}" -f $_.Length, $_.FullName }
+          build\app\python\python.exe -c "from faster_whisper import WhisperModel; WhisperModel(r'build\app\models\whisper\small', device='cpu', compute_type='int8'); from piper import PiperVoice; PiperVoice.load(r'build\app\models\tr_TR-dfki-medium.onnx', config_path=r'build\app\models\tr_TR-dfki-medium.onnx.json'); print('modèles OK')"
+
       - name: Test de démarrage (import de l'appli)
         shell: pwsh
         working-directory: build\app

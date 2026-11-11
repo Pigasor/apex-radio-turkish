@@ -26,6 +26,7 @@ from pathlib import Path
 HERE = Path(__file__).parent
 from paths import DATA, LOCAL  # noqa: E402
 MODELS = LOCAL / "models"
+BUNDLED = HERE / "models"   # voix fournie avec l'installateur (rien à télécharger)
 import i18n
 
 # Voix proposées : seulement des licences libres sans restriction commerciale (vérifié sur les MODEL_CARD de Piper).
@@ -67,7 +68,7 @@ def catalog(lang: str | None = None) -> list[dict]:
     """Voix proposées pour une langue, pour le menu du tableau de bord."""
     lang = lang or i18n.LANG
     return [{"id": k, "name": v[4], "female": v[5], "mb": v[6],
-             "ready": (MODELS / f"{v[1]}.onnx").exists()}
+             "ready": (MODELS / f"{v[1]}.onnx").exists() or (BUNDLED / f"{v[1]}.onnx").exists()}
             for k, v in VOICES.items() if v[0] == lang]
 BASE_URL = "https://huggingface.co/rhasspy/piper-voices/resolve/main/"
 SPEAKER = 0
@@ -230,7 +231,8 @@ class Voice:
     @staticmethod
     def _files(vid: str) -> tuple[Path, Path]:
         name = VOICES[vid][1]
-        return MODELS / f"{name}.onnx", MODELS / f"{name}.onnx.json"
+        d = BUNDLED if (BUNDLED / f"{name}.onnx").exists() and (BUNDLED / f"{name}.onnx.json").exists() else MODELS
+        return d / f"{name}.onnx", d / f"{name}.onnx.json"
 
     def _fetch(self, vid: str) -> None:
         """Télécharge les fichiers d'une voix (une seule fois)."""
