@@ -97,6 +97,85 @@ def ordinal_tr(n: int) -> str:
     return " ".join(w for w in words if w)
 
 
+# ------------------------------------------------------------ prononciation (turc)
+# eSpeak met l'accent turc sur la dernière syllabe. C'est faux pour certains mots courants (« HAdi », « HArika »),
+# pour le présent en -iyor (« kazaNIyorsun ») et pour l'impératif négatif (« bıRAKma »).
+# Mot (sans accent graphique, minuscules) -> syllabe accentuée, comptée depuis 1.
+_TR_STRESS = {
+    "hadi": 1, "haydi": 1, "harika": 1, "harikasın": 1, "şimdi": 1, "sonra": 1, "nasıl": 1, "belki": 1, "biraz": 1,
+    "yani": 1, "işte": 1, "hemen": 1, "henüz": 1, "artık": 1, "önce": 1, "aynı": 1, "yalnızca": 1, "kimse": 1,
+    "nerede": 1, "evet": 1, "hayır": 1, "merhaba": 2, "lütfen": 1, "süper": 1, "bravo": 1, "yine": 1, "ancak": 1,
+    "hâlâ": 1, "hala": 1, "çünkü": 1, "sakın": 1, "yavaş": 1, "aferin": 1, "tamamen": 2, "gerçekten": 2,
+    "bırakma": 2, "etme": 1, "verme": 1, "yapma": 1, "kaçırma": 2, "zorlama": 2, "unutma": 2, "durma": 1,
+}
+_TR_VOWELS = set("aeiouyæɑɐəɛɪɔʊœøɯʏ")
+
+
+def _vowel_starts(ph: str) -> list[int]:
+    """Position de la voyelle de chaque syllabe : la voix a appris l'accent juste avant la voyelle (« hˈadɪ »)."""
+    return [i for i, c in enumerate(ph) if c in _TR_VOWELS and (i == 0 or ph[i - 1] not in _TR_VOWELS)]
+
+
+def _restress(ph: str, syllable: int) -> str:
+    bare = ph.replace("ˈ", "")
+    st = _vowel_starts(bare)
+    if not 1 <= syllable <= len(st):
+        return ph
+    k = st[syllable - 1]
+    return bare[:k] + "ˈ" + bare[k:]
+
+
+def _tr_word_stress(word: str, ph: str) -> str:
+    w = word.lower().replace("i̇", "i")
+    if w in _TR_STRESS:
+        return _restress(ph, _TR_STRESS[w])
+    m = re.search(r"(.*?[aeıioöuü])yor(um|sun|uz|sunuz|lar|du|muş)?$", w)
+    if m and "ˈ" in ph:   # présent : accent sur la voyelle juste avant -yor
+        n = sum(1 for c in m.group(1) if c in "aeıioöuü")
+        return _restress(ph, n)
+    return ph
+
+
+def tr_stress(pv) -> None:
+    """Corrige l'accent des mots turcs dans la phonémisation de Piper (une seule fois par voix chargée)."""
+    if getattr(pv, "_tr_stress", False):
+        return
+    original = pv.phonemize
+
+    def phonemize(text: str) -> list[list[str]]:
+        words = re.findall(r"[^\W\d_]+(?:'[^\W\d_]+)?", text)
+        fixes = {}
+        for w in {w.lower() for w in words}:
+            parts = original(w)
+            if len(parts) != 1:
+                continue
+            ph = "".join(parts[0])
+            new = _tr_word_stress(w, ph)
+            if new != ph:
+                fixes[ph] = new
+        out = []
+        for sent in original(text):
+            s = "".join(sent)
+            for old, new in sorted(fixes.items(), key=lambda x: -len(x[0])):
+                s = re.sub(r"(?<![^\s,.!?;:])" + re.escape(old) + r"(?![^\s,.!?;:])", new, s)
+            out.append(list(s))
+        return out
+
+    pv.phonemize = phonemize
+    pv._tr_stress = True
+
+
+# mots étrangers écrits comme ils se prononcent en turc
+_TR_SPELL = [
+    (re.compile(r"\bsetup", re.I), "setap"), (re.compile(r"\bundercut", re.I), "andırkat"),
+    (re.compile(r"\bovercut", re.I), "ovırkat"), (re.compile(r"\bslick", re.I), "slik"),
+    (re.compile(r"\bspotter", re.I), "spotır"), (re.compile(r"\bHypercar", re.I), "hayperkar"),
+    (re.compile(r"\bELMS\b"), "E L M S"), (re.compile(r"\bWEC\b"), "vek"),
+    (re.compile(r"\bGT(\d)\b"), r"Ge Te \1"), (re.compile(r"\bGTE\b"), "Ge Te E"),
+    (re.compile(r"\bLMP(\d)\b"), r"L M P \1"), (re.compile(r"\bLMU\b"), "L M U"),
+]
+
+
 def spoken(text: str) -> str:
     """Adapte le texte pour qu'il soit bien prononcé."""
     if i18n.en():
@@ -107,6 +186,8 @@ def spoken(text: str) -> str:
         text = text.replace("%", "yüzde ").replace("°", " derece")
         # « 5. virajda » -> « beşinci virajda » : sinon la voix s'arrête au point
         text = re.sub(r"\b(\d{1,3})\. (?=[a-zçğıöşü])", lambda m: ordinal_tr(int(m.group(1))) + " ", text)
+        for rx, rep in _TR_SPELL:
+            text = rx.sub(rep, text)
     else:
         text = re.sub(r"(\d)\.(\d)", r"\1,\2", text)      # 3.6 -> 3,6
         text = text.replace("%", " pour cent").replace("°", " degrés")
@@ -285,6 +366,10 @@ class Voice:
         rate = 22050
         if i18n.fr():
             text = speakable_fr(text)
+        if i18n.tr():
+            # moins d'aléa sur la durée des sons : sinon la voix turque étire des voyelles au hasard (« haaadi »)
+            cfg = SynthesisConfig(speaker_id=cfg.speaker_id, length_scale=SPEED, noise_scale=0.5, noise_w_scale=0.35)
+            tr_stress(self._piper)
         for chunk in self._piper.synthesize(text, syn_config=cfg):
             pcm += chunk.audio_int16_bytes
             rate = chunk.sample_rate

@@ -58,7 +58,8 @@ class Penalties:
                         f"ou un stop and go. Normalement tu as {PENALTY_LAPS} tours.",
                         "Penalty! You need to serve it in the pits, check the screen for drive-through or stop and go. "
                         f"You normally have {PENALTY_LAPS} laps.",
-                        "Ceza! Pitte çekmen gerekiyor; drive-through mu stop and go mu, ekrandan bak. " f"Normalde {PENALTY_LAPS} turun var."), urgent=True)
+                        "Ceza aldın! Pite girip cezanı çekmen gerekiyor. Pitten geçiş cezası mı, dur-kalk cezası mı, ekrandan bak. "
+                        f"Normalde {PENALTY_LAPS} turun var."), urgent=True)
         elif n < self.count:
             if n == 0:
                 self.given_lap = None
