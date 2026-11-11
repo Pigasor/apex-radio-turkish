@@ -15,7 +15,7 @@ import time
 import urllib.request
 from pathlib import Path
 
-REPO = "ApexRadio/apex-radio"
+REPO = "Pigasor/apex-radio-turkish"
 API = f"https://api.github.com/repos/{REPO}/releases/latest"
 PAGE = f"https://github.com/{REPO}/releases/latest"
 LIST = f"https://api.github.com/repos/{REPO}/releases?per_page=30"

@@ -14,7 +14,7 @@ using System.Windows.Forms;
 
 static class ApexRadio
 {
-    const string RELEASES = "https://github.com/ApexRadio/apex-radio/releases";
+    const string RELEASES = "https://github.com/Pigasor/apex-radio-turkish/releases";
 
     [STAThread]
     static int Main(string[] args)

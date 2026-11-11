@@ -17,7 +17,7 @@ if not exist ".venv\Scripts\python.exe" (
   %PY% -m venv .venv
 )
 if not exist ".venv\installe-v4.ok" (
-  echo  Installation / Installing voice and radio components, 2-5 min...
+  echo  Installation / Installing / Bilesenler kuruluyor, 2-5 min...
   ".venv\Scripts\python.exe" -m pip install -q --disable-pip-version-check -r requirements.txt && echo ok> ".venv\installe-v4.ok"
 )
 rem Raccourci "Apex Radio" sur le bureau (une seule fois) / desktop shortcut (once)

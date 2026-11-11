@@ -9,7 +9,7 @@ AppId={{6B0E7C4F-4C1D-4B8E-9C55-A9E0A1B2C3D4}
 AppName=Apex Radio
 AppVersion={#AppVersion}
 AppPublisher=Apex Radio
-AppPublisherURL=https://github.com/ApexRadio/apex-radio
+AppPublisherURL=https://github.com/Pigasor/apex-radio-turkish
 DefaultDirName={localappdata}\Programs\Apex Radio
 DefaultGroupName=Apex Radio
 PrivilegesRequired=lowest
@@ -38,7 +38,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "..\build\app\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [INI]
-Filename: "{app}\versions-precedentes.url"; Section: "InternetShortcut"; Key: "URL"; String: "https://github.com/ApexRadio/apex-radio/releases"
+Filename: "{app}\versions-precedentes.url"; Section: "InternetShortcut"; Key: "URL"; String: "https://github.com/Pigasor/apex-radio-turkish/releases"
 
 [Icons]
 Name: "{group}\Apex Radio"; Filename: "{app}\ApexRadio.exe"; WorkingDir: "{app}"

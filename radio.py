@@ -21,6 +21,7 @@ HERE = Path(__file__).parent
 from paths import DATA, LOCAL  # noqa: E402
 CONFIG = DATA / "config.json"
 WHISPER_MODEL = "small"
+WHISPER_FILES = ("config.json", "tokenizer.json", "vocabulary.txt", "model.bin")   # model.bin en dernier : sa présence = modèle complet
 RATE = 16000
 import i18n
 from i18n import L
@@ -153,14 +154,63 @@ class Radio:
     def _load_whisper(self) -> None:
         try:
             from faster_whisper import WhisperModel
-            print("  Reconnaissance vocale : chargement (le 1er lancement télécharge ~480 Mo)…")
-            self._whisper = WhisperModel(WHISPER_MODEL, device="cpu", compute_type="int8",
-                                         download_root=str(LOCAL / "models" / "whisper"))
-            print("  Reconnaissance vocale : prête")
+            print("  " + L("Reconnaissance vocale : chargement…", "Speech recognition: loading…", "Ses tanıma: yükleniyor…"))
+            model = self._whisper_files()
+            self._whisper = WhisperModel(str(model), device="cpu", compute_type="int8")
+            self.detail = ""
+            print("  " + L("Reconnaissance vocale : prête", "Speech recognition: ready", "Ses tanıma: hazır"))
         except Exception as e:
             import traceback; traceback.print_exc()
             self.detail = L(f"Reconnaissance vocale indisponible : {e!r}", f"Speech recognition unavailable: {e!r}", f"Ses tanıma kullanılamıyor: {e!r}")
             print("  " + self.detail)
+
+    def _whisper_files(self) -> Path:
+        """Dossier du modèle Whisper. Téléchargé une seule fois, fichier par fichier, avec la progression
+        affichée (console + tableau de bord) : sinon le téléchargement de ~480 Mo a l'air bloqué."""
+        root = LOCAL / "models" / "whisper"
+        # déjà là : notre dossier, ou le cache Hugging Face des anciennes versions
+        for d in [root / WHISPER_MODEL, *root.glob(f"models--Systran--faster-whisper-{WHISPER_MODEL}/snapshots/*")]:
+            if all((d / f).exists() for f in WHISPER_FILES):
+                return d
+        import urllib.request
+        dest = root / WHISPER_MODEL
+        dest.mkdir(parents=True, exist_ok=True)
+        base = f"https://huggingface.co/Systran/faster-whisper-{WHISPER_MODEL}/resolve/main/"
+        for f in WHISPER_FILES:
+            out = dest / f
+            if out.exists():
+                continue
+            part = out.with_name(f + ".part")
+            # serveur parfois très lent ou qui se fige : on reprend là où on s'est arrêté (aussi au prochain lancement)
+            for attempt in range(30):
+                done = part.stat().st_size if part.exists() else 0
+                req = urllib.request.Request(base + f, headers={"Range": f"bytes={done}-"} if done else {})
+                try:
+                    with urllib.request.urlopen(req, timeout=30) as r, open(part, "ab" if r.status == 206 else "wb") as fh:
+                        if r.status != 206:
+                            done = 0
+                        total, shown = done + int(r.headers.get("Content-Length") or 0), -1
+                        while chunk := r.read(1 << 16):
+                            fh.write(chunk)
+                            done += len(chunk)
+                            pct = done * 100 // total if total > 1_000_000 else -1
+                            if pct >= 0 and pct != shown:
+                                shown = pct
+                                self.detail = L(f"Téléchargement de la reconnaissance vocale : {pct} % (~480 Mo, une seule fois)",
+                                                f"Downloading speech recognition: {pct} % (~480 MB, only once)",
+                                                f"Ses tanıma indiriliyor: %{pct} (~480 MB, yalnızca bir kez)")
+                                print("\r  " + self.detail, end="", flush=True)
+                    if total and done < total:
+                        raise ConnectionError(f"{done}/{total}")
+                    break
+                except Exception as e:
+                    if attempt == 29:
+                        raise
+                    print(f"\n  {f} : {e!r}, " + L("nouvel essai…", "retrying…", "yeniden deneniyor…"))
+                    time.sleep(min(30, 2 + attempt * 2))
+            part.replace(out)
+        print()
+        return dest
 
     def transcribe(self, audio) -> str:
         segs, _ = self._whisper.transcribe(audio, language=i18n.LANG, beam_size=1, initial_prompt={"en": PROMPT_EN, "tr": PROMPT_TR}.get(i18n.LANG, PROMPT),
